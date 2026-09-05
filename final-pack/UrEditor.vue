@@ -13,7 +13,9 @@
         'ur-editor-toolbar-none': toolbar === 'none',
         'is-view-mode': mode === 'view',
         'ur-editor-is-view-mode': mode === 'view',
-        'ur-editor-is-fullscreen': isFullscreen
+        'ur-editor-is-fullscreen': isFullscreen,
+        'is-source-mode': isSourceEditing,
+        'ur-editor-is-source-mode': isSourceEditing
       }
     ]"
     :style="componentStyle"
@@ -124,6 +126,7 @@ export default {
       isSettingData: false,
       isDestroying: false,
       isFullscreen: false,
+      isSourceEditing: false,
       pasteTimeout: null
     };
   },
@@ -402,17 +405,20 @@ export default {
           });
         }
 
-        // Hỗ trợ SourceEditing cho DecoupledEditor (do CKEditor mặc định chỉ tự động kích hoạt cho ClassicEditor)
+        // Hỗ trợ SourceEditing cho DecoupledEditor và đồng bộ trạng thái isSourceEditing
         const sePlugin = editor.plugins.has('SourceEditing') && editor.plugins.get('SourceEditing');
-        if (sePlugin && this.resolvedEditorType === 'decoupled') {
+        if (sePlugin) {
           sePlugin.on('change:isSourceEditingMode', (evt, name, isSourceEditingMode) => {
-            if (isSourceEditingMode) {
-              if (typeof sePlugin._hideVisibleDialog === 'function') sePlugin._hideVisibleDialog();
-              if (typeof sePlugin._showSourceEditing === 'function') sePlugin._showSourceEditing();
-              if (typeof sePlugin._disableCommands === 'function') sePlugin._disableCommands();
-            } else {
-              if (typeof sePlugin._hideSourceEditing === 'function') sePlugin._hideSourceEditing();
-              if (typeof sePlugin._enableCommands === 'function') sePlugin._enableCommands();
+            this.isSourceEditing = !!isSourceEditingMode;
+            if (this.resolvedEditorType === 'decoupled') {
+              if (isSourceEditingMode) {
+                if (typeof sePlugin._hideVisibleDialog === 'function') sePlugin._hideVisibleDialog();
+                if (typeof sePlugin._showSourceEditing === 'function') sePlugin._showSourceEditing();
+                if (typeof sePlugin._disableCommands === 'function') sePlugin._disableCommands();
+              } else {
+                if (typeof sePlugin._hideSourceEditing === 'function') sePlugin._hideSourceEditing();
+                if (typeof sePlugin._enableCommands === 'function') sePlugin._enableCommands();
+              }
             }
           });
           sePlugin.on('change:isEnabled', (evt, name, isEnabled) => {
@@ -560,40 +566,106 @@ export default {
       border-radius: 4px;
       overflow: hidden;
       background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
     }
 
     .ck-decoupled-toolbar,
     .ur-editor-decoupled-toolbar {
       border-bottom: 1px solid #cbd5e1;
       background: #ffffff;
+      flex-shrink: 0;
     }
 
     .ck-decoupled-editable-wrapper,
     .ur-editor-decoupled-editable-wrapper {
+      flex: 1 1 auto;
+      min-height: 0;
       overflow-y: auto !important;
-      max-height: calc(var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) - 42px) !important;
       padding: 24px;
+      background: #f8fafc;
+      display: flex;
+      justify-content: center;
+      box-sizing: border-box;
     }
 
-    /* Decoupled Source Editing */
+    .ck-decoupled-editable,
+    .ur-editor-decoupled-editable {
+      width: 100%;
+      max-width: 850px;
+      background: #ffffff;
+      padding: 40px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+      border-radius: 2px;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    /* Decoupled Source Editing - Hiển thị 100% full-width & full-height giống Classic Editor */
+    &.ur-editor-is-source-mode .ck-decoupled-editable-wrapper,
+    &.is-source-mode .ck-decoupled-editable-wrapper,
+    .ck-decoupled-editable-wrapper:has(.ck-source-editing-area) {
+      padding: 0 !important;
+      background: #ffffff !important;
+      display: flex !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
+    }
+
     .ck-source-editing-area {
       width: 100% !important;
-      max-width: 850px !important;
-      min-height: 400px !important;
+      max-width: 100% !important;
+      min-width: 100% !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      max-height: 100% !important;
+      flex: 1 1 auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
       background: #ffffff !important;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
-      border: 1px solid #e2e8f0 !important;
-      border-radius: 4px !important;
+      border: none !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      overflow: hidden !important;
+      display: flex !important;
+      flex-direction: column !important;
       box-sizing: border-box !important;
 
+      &.ck-focused {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+      }
+
       textarea {
-        min-height: 400px !important;
-        padding: 40px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        max-height: 100% !important;
+        flex: 1 1 auto !important;
+        padding: 16px !important;
+        margin: 0 !important;
+        background: #ffffff !important;
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
         box-sizing: border-box !important;
         font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
         font-size: 13.5px !important;
         line-height: 1.6 !important;
+        overflow-y: auto !important;
         resize: none !important;
+        color: #1e293b !important;
+
+        &:focus {
+          outline: none !important;
+          box-shadow: none !important;
+          border: none !important;
+        }
       }
     }
   }
