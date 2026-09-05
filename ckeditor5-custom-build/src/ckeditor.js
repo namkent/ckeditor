@@ -55,11 +55,13 @@ import {
   Markdown,
   Essentials,
   Paragraph,
-  Fullscreen
+  Fullscreen,
+  Emoji
 } from 'ckeditor5';
 
 import 'ckeditor5/ckeditor5.css';
 import '@ckeditor/ckeditor5-fullscreen/dist/index.css';
+import '@ckeditor/ckeditor5-emoji/dist/index.css';
 import './custom.css';
 
 // Common Plugin List
@@ -113,6 +115,7 @@ const builtinPlugins = [
   ShowBlocks,
   SelectAll,
   Fullscreen,
+  Emoji,
   SourceEditing,
   GeneralHtmlSupport,
   WordCount
@@ -159,6 +162,7 @@ const defaultConfig = {
       'codeBlock',
       'horizontalLine',
       'specialCharacters',
+      'emoji',
       'pageBreak',
       'mediaEmbed',
       'htmlEmbed',
@@ -238,6 +242,7 @@ ClassicEditor.BalloonEditor = BalloonEditor;
 ClassicEditor.DecoupledEditor = DecoupledEditor;
 ClassicEditor.Markdown = Markdown;
 ClassicEditor.Fullscreen = Fullscreen;
+ClassicEditor.Emoji = Emoji;
 
 export {
   ClassicEditor,
@@ -245,7 +250,8 @@ export {
   BalloonEditor,
   DecoupledEditor,
   Markdown,
-  Fullscreen
+  Fullscreen,
+  Emoji
 };
 
 export default ClassicEditor;

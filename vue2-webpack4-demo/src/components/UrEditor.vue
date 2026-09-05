@@ -247,6 +247,7 @@ export default {
           'codeBlock',
           'horizontalLine',
           'specialCharacters',
+          'emoji',
           'pageBreak',
           'mediaEmbed',
           'htmlEmbed',
@@ -273,6 +274,7 @@ export default {
           'numberedList',
           'insertTable',
           'blockQuote',
+          'emoji',
           '|',
           'undo',
           'redo'
