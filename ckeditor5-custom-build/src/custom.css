@@ -267,14 +267,23 @@ a.ck.ck-powered-by__link {
   --ckeditor-custom-height: 250px;
 }
 
-.ur-editor-wrapper.mode-classic .ck-editor__editable,
-.ckeditor5-component.mode-classic .ck-editor__editable {
+.ur-editor-wrapper.mode-classic .ck-editor__main > .ck-editor__editable:not(.ck-editor__nested-editable),
+.ckeditor5-component.mode-classic .ck-editor__main > .ck-editor__editable:not(.ck-editor__nested-editable) {
   min-height: var(--ur-editor-custom-height, var(--ckeditor-custom-height, 250px)) !important;
   max-height: var(--ur-editor-custom-height, var(--ckeditor-custom-height, 250px)) !important;
   height: var(--ur-editor-custom-height, var(--ckeditor-custom-height, 250px)) !important;
   overflow-y: auto !important;
   box-sizing: border-box !important;
 }
+
+/* Explicitly keep nested editables (table cells, captions) auto-sized */
+.ck-editor__nested-editable {
+  min-height: unset !important;
+  max-height: unset !important;
+  height: auto !important;
+  overflow-y: visible !important;
+}
+
 
 /* Source Editing textarea & wrapper: lock height to match WYSIWYG mode */
 .ur-editor-wrapper.mode-classic .ck-source-editing-area,

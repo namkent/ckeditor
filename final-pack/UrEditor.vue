@@ -512,12 +512,20 @@ export default {
   /* 1. Classic Editor: Chiều cao & Cuộn cho WYSIWYG & Source Editing */
   &.mode-classic,
   &.ur-editor-type-classic {
-    .ck-editor__editable {
+    .ck-editor__main > .ck-editor__editable:not(.ck-editor__nested-editable) {
       min-height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
       max-height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
       height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
       overflow-y: auto !important;
       box-sizing: border-box !important;
+    }
+
+    /* Đảm bảo các ô trong bảng (nested editables) không bị gán chiều cao của editor */
+    .ck-editor__nested-editable {
+      min-height: unset !important;
+      max-height: unset !important;
+      height: auto !important;
+      overflow-y: visible !important;
     }
 
     /* Khóa chiều cao cho chế độ edit source (textarea) bằng đúng chiều cao editor */
