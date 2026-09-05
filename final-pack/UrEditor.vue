@@ -57,7 +57,7 @@ import {
   BalloonEditor, 
   DecoupledEditor,
   Markdown
-} from '../../../ckeditor5-custom-build/dist/ckeditor.js';
+} from './dist/ckeditor.js';
 
 export default {
   name: 'UrEditor',
@@ -369,8 +369,8 @@ export default {
         }
 
         // Lắng nghe sự kiện toggle fullscreen từ command / plugin
-        if (editor.commands && editor.commands.get('fullscreen')) {
-          const fsCmd = editor.commands.get('fullscreen');
+        const fsCmd = editor.commands && (editor.commands.get('toggleFullscreen') || editor.commands.get('fullscreen'));
+        if (fsCmd) {
           fsCmd.on('change:value', (evt, name, val) => {
             this.isFullscreen = !!val;
             this.$emit('fullscreen-change', this.isFullscreen);

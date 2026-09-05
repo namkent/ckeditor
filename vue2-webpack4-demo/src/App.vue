@@ -10,7 +10,7 @@
         </div>
       </div>
       <div class="header-badges">
-        <span class="badge badge-primary">CKEditor v44</span>
+        <span class="badge badge-primary">CKEditor v48 (Latest)</span>
         <span class="badge badge-success">Vue v2.7</span>
         <span class="badge badge-warning">Webpack v4</span>
       </div>
@@ -348,14 +348,14 @@ const customConfig = {
 </template>
 
 <script>
-import CKEditor5 from './components/CKEditor5.vue';
 import UrEditor from './components/UrEditor.vue';
 import '../../ckeditor5-custom-build/dist/ckeditor.css';
 
 export default {
   name: 'App',
   components: {
-    'ckeditor-5': CKEditor5, UrEditor
+    'ckeditor-5': UrEditor,
+    UrEditor
   },
   data() {
     return {

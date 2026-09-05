@@ -16,58 +16,6 @@ a.ck.ck-powered-by__link {
 }
 
 /* =======================================================
-   FULLSCREEN MODE (Wrapper level fullscreen toggle)
-   ======================================================= */
-
-.ckeditor5-component.ck-fullscreen-active {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  z-index: 999999 !important;
-  background: #ffffff !important;
-  padding: 8px !important;
-  box-sizing: border-box !important;
-  display: flex !important;
-  flex-direction: column !important;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5) !important;
-}
-
-.ckeditor5-component.ck-fullscreen-active .ck-standard-wrapper,
-.ckeditor5-component.ck-fullscreen-active .ck-editor {
-  display: flex !important;
-  flex-direction: column !important;
-  height: 100% !important;
-  flex: 1 !important;
-}
-
-.ckeditor5-component.ck-fullscreen-active .ck-editor__main {
-  flex: 1 !important;
-  overflow: hidden !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-.ckeditor5-component.ck-fullscreen-active .ck-editor__editable {
-  flex: 1 !important;
-  max-height: none !important;
-  min-height: 100% !important;
-  height: 100% !important;
-  overflow-y: auto !important;
-}
-
-.ckeditor5-component.ck-fullscreen-active.mode-decoupled .ck-decoupled-container {
-  height: 100% !important;
-  max-height: 100% !important;
-}
-
-.ckeditor5-component.ck-fullscreen-active.mode-decoupled .ck-decoupled-editable-wrapper {
-  flex: 1 !important;
-  max-height: none !important;
-}
-
-/* =======================================================
    DECOUPLED DOCUMENT EDITOR CONTAINER
    ======================================================= */
 .ck-decoupled-container {

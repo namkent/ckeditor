@@ -17,7 +17,7 @@
   "author": "",
   "license": "GPL-2.0-or-later",
   "dependencies": {
-    "ckeditor5": "^44.3.0",
+    "ckeditor5": "^48.5.0",
     "lodash-es": "^4.17.21"
   },
   "devDependencies": {
