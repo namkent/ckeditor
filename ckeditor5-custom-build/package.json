@@ -1,0 +1,26 @@
+{
+  "name": "ckeditor5-custom-build",
+  "version": "1.0.0",
+  "description": "Standalone custom build of CKEditor 5 for legacy Vue 2 and Webpack 4",
+  "main": "dist/ckeditor.js",
+  "style": "dist/ckeditor.css",
+  "scripts": {
+    "build": "vite build"
+  },
+  "keywords": [
+    "ckeditor5",
+    "ckeditor",
+    "vue2",
+    "webpack4",
+    "custom-build"
+  ],
+  "author": "",
+  "license": "GPL-2.0-or-later",
+  "dependencies": {
+    "ckeditor5": "^44.3.0",
+    "lodash-es": "^4.17.21"
+  },
+  "devDependencies": {
+    "vite": "^5.4.14"
+  }
+}
