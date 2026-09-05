@@ -204,3 +204,16 @@ a.ck.ck-powered-by__link {
   background-color: #f8fafc;
   margin-top: 4px;
 }
+
+/* =======================================================
+   SOURCE EDITING BUTTON: Icon only (hide "Source" text)
+   ======================================================= */
+.ck.ck-button.ck-source-editing-button .ck-button__label {
+  display: none !important;
+}
+
+.ck.ck-button.ck-source-editing-button {
+  padding-left: var(--ck-spacing-medium, 6px) !important;
+  padding-right: var(--ck-spacing-medium, 6px) !important;
+  min-width: unset !important;
+}
