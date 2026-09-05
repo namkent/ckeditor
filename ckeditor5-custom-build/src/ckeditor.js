@@ -49,6 +49,11 @@ import {
   FindAndReplace,
   SpecialCharacters,
   SpecialCharactersEssentials,
+  SpecialCharactersArrows,
+  SpecialCharactersCurrency,
+  SpecialCharactersMathematical,
+  SpecialCharactersLatin,
+  SpecialCharactersText,
   PageBreak,
   ShowBlocks,
   SelectAll,
@@ -56,12 +61,22 @@ import {
   Essentials,
   Paragraph,
   Fullscreen,
-  Emoji
+  Emoji,
+  Indent,
+  IndentBlock,
+  PasteFromOffice,
+  TextTransformation,
+  AutoImage,
+  PictureEditing,
+  TableScroll,
+  TableLayout,
+  Bookmark
 } from 'ckeditor5';
 
 import 'ckeditor5/ckeditor5.css';
 import '@ckeditor/ckeditor5-fullscreen/dist/index.css';
 import '@ckeditor/ckeditor5-emoji/dist/index.css';
+import '@ckeditor/ckeditor5-bookmark/dist/index.css';
 import './custom.css';
 
 // Common Plugin List
@@ -111,11 +126,25 @@ const builtinPlugins = [
   FindAndReplace,
   SpecialCharacters,
   SpecialCharactersEssentials,
+  SpecialCharactersArrows,
+  SpecialCharactersCurrency,
+  SpecialCharactersMathematical,
+  SpecialCharactersLatin,
+  SpecialCharactersText,
   PageBreak,
   ShowBlocks,
   SelectAll,
   Fullscreen,
   Emoji,
+  Indent,
+  IndentBlock,
+  PasteFromOffice,
+  TextTransformation,
+  AutoImage,
+  PictureEditing,
+  TableScroll,
+  TableLayout,
+  Bookmark,
   SourceEditing,
   GeneralHtmlSupport,
   WordCount
@@ -151,11 +180,15 @@ const defaultConfig = {
       'removeFormat',
       '|',
       'alignment',
+      '|',
       'bulletedList',
       'numberedList',
       'todoList',
+      'outdent',
+      'indent',
       '|',
       'link',
+      'bookmark',
       'insertImage',
       'insertTable',
       'blockQuote',
@@ -243,6 +276,9 @@ ClassicEditor.DecoupledEditor = DecoupledEditor;
 ClassicEditor.Markdown = Markdown;
 ClassicEditor.Fullscreen = Fullscreen;
 ClassicEditor.Emoji = Emoji;
+ClassicEditor.Bookmark = Bookmark;
+ClassicEditor.Indent = Indent;
+ClassicEditor.IndentBlock = IndentBlock;
 
 export {
   ClassicEditor,
@@ -251,7 +287,10 @@ export {
   DecoupledEditor,
   Markdown,
   Fullscreen,
-  Emoji
+  Emoji,
+  Bookmark,
+  Indent,
+  IndentBlock
 };
 
 export default ClassicEditor;
