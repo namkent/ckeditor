@@ -217,3 +217,42 @@ a.ck.ck-powered-by__link {
   padding-right: var(--ck-spacing-medium, 6px) !important;
   min-width: unset !important;
 }
+
+/* =======================================================
+   HEADING DROPDOWN: Compact Icon Button [ H ▾ ]
+   Matches the style, size, and padding of standard icon dropdowns
+   ======================================================= */
+.ck.ck-dropdown.ck-heading-dropdown {
+  width: auto !important;
+}
+
+.ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button {
+  min-width: unset !important;
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+}
+
+/* Hide the long text label ("Paragraph", "Heading 1", etc.) */
+.ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button .ck-button__label {
+  display: none !important;
+}
+
+/* Render the Heading Icon (H) before the dropdown arrow */
+.ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button::before {
+  content: "";
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 4v12M15 4v12M5 10h10'/%3E%3C/svg%3E") no-repeat center / contain;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 4v12M15 4v12M5 10h10'/%3E%3C/svg%3E") no-repeat center / contain;
+  vertical-align: middle;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button .ck-dropdown__arrow {
+  margin-left: 3px !important;
+  margin-right: 0 !important;
+  right: auto !important;
+}

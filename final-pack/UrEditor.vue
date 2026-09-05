@@ -57,7 +57,7 @@ import {
   BalloonEditor, 
   DecoupledEditor,
   Markdown
-} from './dist/ckeditor.js';
+} from '../../../ckeditor5-custom-build/dist/ckeditor.js';
 
 export default {
   name: 'UrEditor',
@@ -280,7 +280,6 @@ export default {
           'insertImage',
           'insertTable',
           'blockQuote',
-          'mediaEmbed',
           'emoji',
           '|',
           'bulletedList',

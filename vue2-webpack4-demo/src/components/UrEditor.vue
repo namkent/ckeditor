@@ -280,7 +280,6 @@ export default {
           'insertImage',
           'insertTable',
           'blockQuote',
-          'mediaEmbed',
           'emoji',
           '|',
           'bulletedList',
