@@ -601,6 +601,10 @@ export default {
       border-radius: 2px;
       box-sizing: border-box;
       outline: none;
+      overflow: visible !important;
+      overflow-y: visible !important;
+      height: auto !important;
+      max-height: none !important;
     }
 
     /* Decoupled Source Editing - Hiển thị 100% full-width & full-height giống Classic Editor */
@@ -727,6 +731,24 @@ export default {
     width: 0 !important;
     height: 0 !important;
     overflow: hidden !important;
+  }
+
+  /* 8. Heading Dropdown Disabled State (in Source Edit mode or when disabled) */
+  .ck.ck-dropdown.ck-heading-dropdown.ck-disabled,
+  .ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button.ck-disabled,
+  .ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button[aria-disabled="true"],
+  &.ur-editor-is-source-mode .ck-heading-dropdown,
+  &.ur-editor-is-source-mode .ck-heading-dropdown .ck-dropdown__button,
+  &.is-source-mode .ck-heading-dropdown,
+  &.is-source-mode .ck-heading-dropdown .ck-dropdown__button {
+    opacity: 0.45 !important;
+    cursor: default !important;
+    pointer-events: none !important;
+
+    &::before,
+    .ck-dropdown__button::before {
+      opacity: 0.45 !important;
+    }
   }
 }
 </style>

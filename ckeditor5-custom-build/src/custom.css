@@ -52,6 +52,10 @@ a.ck.ck-powered-by__link {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   border: 1px solid #e2e8f0;
   border-radius: 4px;
+  overflow: visible !important;
+  overflow-y: visible !important;
+  height: auto !important;
+  max-height: none !important;
 }
 
 /* =======================================================
@@ -255,6 +259,30 @@ a.ck.ck-powered-by__link {
   margin-left: 3px !important;
   margin-right: 0 !important;
   right: auto !important;
+}
+
+/* Heading Dropdown: Disabled state (e.g. in Source Edit mode or when disabled) */
+.ck.ck-dropdown.ck-heading-dropdown.ck-disabled,
+.ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button.ck-disabled,
+.ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button[aria-disabled="true"],
+.ck-source-editing-mode .ck-heading-dropdown,
+.ck-source-editing-mode .ck-heading-dropdown .ck-dropdown__button,
+.ur-editor-is-source-mode .ck-heading-dropdown,
+.ur-editor-is-source-mode .ck-heading-dropdown .ck-dropdown__button,
+.is-source-mode .ck-heading-dropdown,
+.is-source-mode .ck-heading-dropdown .ck-dropdown__button {
+  opacity: var(--ck-color-button-disabled-opacity, 0.45) !important;
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
+.ck.ck-dropdown.ck-heading-dropdown.ck-disabled .ck-dropdown__button::before,
+.ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button.ck-disabled::before,
+.ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button[aria-disabled="true"]::before,
+.ck-source-editing-mode .ck-heading-dropdown .ck-dropdown__button::before,
+.ur-editor-is-source-mode .ck-heading-dropdown .ck-dropdown__button::before,
+.is-source-mode .ck-heading-dropdown .ck-dropdown__button::before {
+  opacity: var(--ck-color-button-disabled-opacity, 0.45) !important;
 }
 
 /* =======================================================
