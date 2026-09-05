@@ -162,6 +162,9 @@ const defaultConfig = {
   },
   toolbar: {
     items: [
+      'undo',
+      'redo',
+      '|',
       'heading',
       '|',
       'fontSize',
@@ -189,6 +192,7 @@ const defaultConfig = {
       '|',
       'link',
       'bookmark',
+      'uploadImage',
       'insertImage',
       'insertTable',
       'blockQuote',
@@ -204,9 +208,7 @@ const defaultConfig = {
       'showBlocks',
       'selectAll',
       'fullscreen',
-      'sourceEditing',
-      'undo',
-      'redo'
+      'sourceEditing'
     ],
     shouldNotGroupWhenFull: true
   },

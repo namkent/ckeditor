@@ -218,6 +218,9 @@ export default {
       let items = [];
       if (this.toolbar === 'full') {
         items = [
+          'undo',
+          'redo',
+          '|',
           'heading',
           '|',
           'fontSize',
@@ -245,6 +248,7 @@ export default {
           '|',
           'link',
           'bookmark',
+          'uploadImage',
           'insertImage',
           'insertTable',
           'blockQuote',
@@ -258,14 +262,14 @@ export default {
           '|',
           'findAndReplace',
           'showBlocks',
-          'selectAll',
-          '|',
-          'undo',
-          'redo'
+          'selectAll'
         ];
       } else {
         // 'normal' default
         items = [
+          'undo',
+          'redo',
+          '|',
           'heading',
           '|',
           'bold',
@@ -274,16 +278,17 @@ export default {
           'strikethrough',
           '|',
           'link',
+          'uploadImage',
+          'insertImage',
+          'insertTable',
+          'blockQuote',
+          'mediaEmbed',
+          'emoji',
+          '|',
           'bulletedList',
           'numberedList',
           'outdent',
-          'indent',
-          'insertTable',
-          'blockQuote',
-          'emoji',
-          '|',
-          'undo',
-          'redo'
+          'indent'
         ];
       }
 

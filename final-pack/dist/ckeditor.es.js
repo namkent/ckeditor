@@ -96710,6 +96710,9 @@ const OX = [
   },
   toolbar: {
     items: [
+      "undo",
+      "redo",
+      "|",
       "heading",
       "|",
       "fontSize",
@@ -96737,6 +96740,7 @@ const OX = [
       "|",
       "link",
       "bookmark",
+      "uploadImage",
       "insertImage",
       "insertTable",
       "blockQuote",
@@ -96752,9 +96756,7 @@ const OX = [
       "showBlocks",
       "selectAll",
       "fullscreen",
-      "sourceEditing",
-      "undo",
-      "redo"
+      "sourceEditing"
     ],
     shouldNotGroupWhenFull: !0
   },
