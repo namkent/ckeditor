@@ -288,8 +288,9 @@ export default {
         ];
       }
 
-      // Nút sourceEditing chỉ hỗ trợ trong Classic Editor khi bật prop source
-      if (this.source && this.resolvedEditorType === 'classic' && !items.includes('sourceEditing')) {
+      // Nút sourceEditing hỗ trợ trong Classic Editor và Decoupled Editor khi bật prop source
+      const supportsSource = this.resolvedEditorType === 'classic' || this.resolvedEditorType === 'decoupled';
+      if (this.source && supportsSource && !items.includes('sourceEditing')) {
         items.push('|', 'sourceEditing');
       }
 
@@ -401,6 +402,31 @@ export default {
           });
         }
 
+        // Hỗ trợ SourceEditing cho DecoupledEditor (do CKEditor mặc định chỉ tự động kích hoạt cho ClassicEditor)
+        const sePlugin = editor.plugins.has('SourceEditing') && editor.plugins.get('SourceEditing');
+        if (sePlugin && this.resolvedEditorType === 'decoupled') {
+          sePlugin.on('change:isSourceEditingMode', (evt, name, isSourceEditingMode) => {
+            if (isSourceEditingMode) {
+              if (typeof sePlugin._hideVisibleDialog === 'function') sePlugin._hideVisibleDialog();
+              if (typeof sePlugin._showSourceEditing === 'function') sePlugin._showSourceEditing();
+              if (typeof sePlugin._disableCommands === 'function') sePlugin._disableCommands();
+            } else {
+              if (typeof sePlugin._hideSourceEditing === 'function') sePlugin._hideSourceEditing();
+              if (typeof sePlugin._enableCommands === 'function') sePlugin._enableCommands();
+            }
+          });
+          sePlugin.on('change:isEnabled', (evt, name, isEnabled) => {
+            if (typeof sePlugin._handleReadOnlyMode === 'function') {
+              sePlugin._handleReadOnlyMode(!isEnabled);
+            }
+          });
+          editor.on('change:isReadOnly', (evt, name, isReadOnly) => {
+            if (typeof sePlugin._handleReadOnlyMode === 'function') {
+              sePlugin._handleReadOnlyMode(isReadOnly);
+            }
+          });
+        }
+
         // Data change listener
         editor.model.document.on('change:data', () => {
           if (this.isSettingData || this.isDestroying) return;
@@ -476,14 +502,14 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .ckeditor5-component,
 .ur-editor-wrapper {
   width: 100%;
   position: relative;
   box-sizing: border-box;
 
-  /* 1. Classic Editor: Chiều cao & Cuộn cho WYSIWYG */
+  /* 1. Classic Editor: Chiều cao & Cuộn cho WYSIWYG & Source Editing */
   &.mode-classic,
   &.ur-editor-type-classic {
     .ck-editor__editable {
@@ -491,6 +517,29 @@ export default {
       max-height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
       height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
       overflow-y: auto !important;
+      box-sizing: border-box !important;
+    }
+
+    /* Khóa chiều cao cho chế độ edit source (textarea) bằng đúng chiều cao editor */
+    .ck-source-editing-area {
+      min-height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
+      max-height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
+      height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
+      overflow: hidden !important;
+      box-sizing: border-box !important;
+
+      textarea {
+        min-height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
+        max-height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
+        height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
+        overflow-y: auto !important;
+        box-sizing: border-box !important;
+        resize: none !important;
+        padding: 16px !important;
+        font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+        font-size: 13.5px !important;
+        line-height: 1.6 !important;
+      }
     }
   }
 
@@ -513,9 +562,31 @@ export default {
 
     .ck-decoupled-editable-wrapper,
     .ur-editor-decoupled-editable-wrapper {
-      overflow-y: auto;
-      max-height: calc(var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) - 42px);
+      overflow-y: auto !important;
+      max-height: calc(var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) - 42px) !important;
       padding: 24px;
+    }
+
+    /* Decoupled Source Editing */
+    .ck-source-editing-area {
+      width: 100% !important;
+      max-width: 850px !important;
+      min-height: 400px !important;
+      background: #ffffff !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 4px !important;
+      box-sizing: border-box !important;
+
+      textarea {
+        min-height: 400px !important;
+        padding: 40px !important;
+        box-sizing: border-box !important;
+        font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+        font-size: 13.5px !important;
+        line-height: 1.6 !important;
+        resize: none !important;
+      }
     }
   }
 

@@ -125,15 +125,15 @@
             </button>
           </div>
 
-          <!-- Prop: source (Admin mode - Classic only) -->
-          <div class="prop-control prop-switch" :class="{ 'is-disabled-prop': currentMode === 'view' || currentEditor !== 'classic' }">
-            <label class="prop-label"><code>:source</code> (Admin - Classic)</label>
+          <!-- Prop: source (Admin mode - Classic & Decoupled) -->
+          <div class="prop-control prop-switch" :class="{ 'is-disabled-prop': currentMode === 'view' || (currentEditor !== 'classic' && currentEditor !== 'decoupled') }">
+            <label class="prop-label"><code>:source</code> (Classic / Decoupled)</label>
             <button 
               class="switch-btn"
-              :class="{ 'is-on': isSourceEnabled && currentEditor === 'classic' }"
+              :class="{ 'is-on': isSourceEnabled && (currentEditor === 'classic' || currentEditor === 'decoupled') }"
               @click="isSourceEnabled = !isSourceEnabled"
             >
-              {{ (isSourceEnabled && currentEditor === 'classic') ? '🛠️ TRUE (Bật Source)' : '🚫 FALSE (Tắt)' }}
+              {{ (isSourceEnabled && (currentEditor === 'classic' || currentEditor === 'decoupled')) ? '🛠️ TRUE (Bật Source)' : '🚫 FALSE (Tắt)' }}
             </button>
           </div>
         </div>
