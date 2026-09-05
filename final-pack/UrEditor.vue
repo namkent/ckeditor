@@ -57,7 +57,7 @@ import {
   BalloonEditor, 
   DecoupledEditor,
   Markdown
-} from '../../../ckeditor5-custom-build/dist/ckeditor.js';
+} from './dist/ckeditor.js';
 
 export default {
   name: 'UrEditor',
@@ -222,7 +222,6 @@ export default {
           'redo',
           '|',
           'heading',
-          '|',
           'fontSize',
           'fontFamily',
           'fontColor',
@@ -270,7 +269,7 @@ export default {
           'redo',
           '|',
           'heading',
-          '|',
+          'fontFamily',
           'bold',
           'italic',
           'underline',
@@ -294,8 +293,9 @@ export default {
         items.push('|', 'sourceEditing');
       }
 
-      // Nút fullscreen đặt ở cuối toolbar
-      if (!items.includes('fullscreen')) {
+      // Nút fullscreen chỉ hỗ trợ Classic và Decoupled (tắt ở Inline và Balloon để tránh lỗi giao diện)
+      const supportsFullscreen = this.resolvedEditorType === 'classic' || this.resolvedEditorType === 'decoupled';
+      if (supportsFullscreen && !items.includes('fullscreen')) {
         items.push('|', 'fullscreen');
       }
 
@@ -304,6 +304,7 @@ export default {
 
     buildConfig() {
       const baseConfig = Object.assign({}, this.config);
+      const supportsFullscreen = this.resolvedEditorType === 'classic' || this.resolvedEditorType === 'decoupled';
 
       // License Key & Clean PoweredBy
       if (!baseConfig.licenseKey) {
@@ -317,6 +318,15 @@ export default {
             label: ''
           }
         };
+      }
+
+      // Loại bỏ plugin Fullscreen ở mode inline và balloon để tránh lỗi giao diện
+      if (!supportsFullscreen) {
+        const removePlugins = baseConfig.removePlugins ? [...baseConfig.removePlugins] : [];
+        if (!removePlugins.includes('Fullscreen')) {
+          removePlugins.push('Fullscreen');
+        }
+        baseConfig.removePlugins = removePlugins;
       }
 
       // Đăng ký Markdown nếu format = markdown
@@ -334,6 +344,10 @@ export default {
         baseConfig.toolbar = Object.assign({}, baseConfig.toolbar, {
           items: toolbarItems,
           shouldNotGroupWhenFull: true
+        });
+      } else if (!supportsFullscreen && Array.isArray(baseConfig.toolbar.items)) {
+        baseConfig.toolbar = Object.assign({}, baseConfig.toolbar, {
+          items: baseConfig.toolbar.items.filter(item => item !== 'fullscreen')
         });
       }
 
