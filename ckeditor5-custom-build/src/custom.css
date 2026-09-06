@@ -408,40 +408,85 @@ a.ck.ck-powered-by__link {
   box-sizing: border-box !important;
 }
 
-.ur-editor-wrapper.mode-decoupled .ck-source-editing-area.ck-focused,
-.ckeditor5-component.mode-decoupled .ck-source-editing-area.ck-focused {
-  border: none !important;
-  box-shadow: none !important;
-  outline: none !important;
+/* =============================================
+   CodeMirror Styles in Source Editing Modal
+   ============================================= */
+.ur-source-modal-codemirror {
+  width: 100%;
+  height: 100%;
+  flex: 1 1 0px;
+  min-height: 0;
+  position: relative;
+  display: flex;
 }
 
-.ur-editor-wrapper.mode-decoupled .ck-source-editing-area textarea,
-.ckeditor5-component.mode-decoupled .ck-source-editing-area textarea {
+.ur-source-modal-codemirror .CodeMirror {
   width: 100% !important;
-  max-width: 100% !important;
-  min-width: 100% !important;
   height: 100% !important;
-  min-height: 0 !important;
-  max-height: 100% !important;
-  flex: 1 1 auto !important;
-  padding: 16px !important;
-  margin: 0 !important;
-  background: #ffffff !important;
-  border: none !important;
-  box-shadow: none !important;
-  outline: none !important;
-  box-sizing: border-box !important;
   font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
-  font-size: 13.5px !important;
-  line-height: 1.6 !important;
-  overflow-y: auto !important;
-  resize: none !important;
+  font-size: 13px !important;
+  line-height: 20px !important;
   color: #1e293b !important;
+  background: #ffffff !important;
 }
 
-.ur-editor-wrapper.mode-decoupled .ck-source-editing-area textarea:focus,
-.ckeditor5-component.mode-decoupled .ck-source-editing-area textarea:focus {
-  outline: none !important;
-  box-shadow: none !important;
-  border: none !important;
+.ur-source-modal-codemirror .CodeMirror-gutters {
+  background: #ffffff !important;
+  border-right: 1px solid #e2e8f0 !important;
+  width: 52px !important;
+  padding-right: 4px !important;
+}
+
+.ur-source-modal-codemirror .CodeMirror-linenumber {
+  color: #94a3b8 !important;
+  font-size: 13px !important;
+  padding: 0 8px 0 0 !important;
+}
+
+.ur-source-modal-codemirror .CodeMirror-lines {
+  padding: 14px 0 !important;
+}
+
+.ur-source-modal-codemirror .CodeMirror-cursor {
+  border-left: 2px solid #0f172a !important;
+}
+
+.ur-source-modal-codemirror .CodeMirror-selected {
+  background: #dbeafe !important;
+}
+
+/* Syntax Highlighting overrides for clean modern aesthetic */
+.ur-source-modal-codemirror .cm-tag {
+  color: #2563eb !important;
+  font-weight: 500;
+}
+
+.ur-source-modal-codemirror .cm-attribute {
+  color: #9333ea !important;
+}
+
+.ur-source-modal-codemirror .cm-string {
+  color: #16a34a !important;
+}
+
+.ur-source-modal-codemirror .cm-header {
+  color: #0284c7 !important;
+  font-weight: bold;
+}
+
+.ur-source-modal-codemirror .cm-comment {
+  color: #94a3b8 !important;
+  font-style: italic;
+}
+
+/* =============================================
+   Fullscreen Mode Z-Index Elevation
+   ============================================= */
+.ur-editor-wrapper.ur-editor-is-fullscreen,
+.ckeditor5-component.ur-editor-is-fullscreen {
+  z-index: 100005 !important;
+}
+
+.ur-source-modal-overlay {
+  z-index: 1000001 !important;
 }

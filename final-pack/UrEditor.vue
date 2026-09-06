@@ -53,6 +53,7 @@
     <!-- ENHANCED SOURCE EDITING MODAL DIALOG -->
     <div 
       v-if="isSourceModalOpen" 
+      ref="sourceModalOverlay"
       class="ur-source-modal-overlay"
       @click.self="closeSourceModal"
       @keydown.esc="closeSourceModal"
@@ -72,29 +73,9 @@
           </button>
         </div>
 
-        <!-- Modal Body: Line Numbers + Code Editor -->
+        <!-- Modal Body: CodeMirror 6 Code Editor -->
         <div class="ur-source-modal-body">
-          <div ref="sourceGutter" class="ur-source-modal-gutter" aria-hidden="true">
-            <div 
-              v-for="n in sourceLineCount" 
-              :key="n" 
-              class="ur-source-modal-line-number"
-            >{{ n }}</div>
-          </div>
-          <textarea
-            ref="sourceTextarea"
-            v-model="sourceModalContent"
-            class="ur-source-modal-textarea"
-            spellcheck="false"
-            wrap="off"
-            placeholder="Enter source code..."
-            @scroll="syncGutterScroll"
-            @input="updateLineCount"
-            @keydown.tab.prevent="handleTabKey"
-            @keydown.esc.stop="closeSourceModal"
-            @keydown.ctrl.83.prevent.stop="saveSourceModal"
-            @keydown.meta.83.prevent.stop="saveSourceModal"
-          ></textarea>
+          <div ref="sourceEditorContainer" class="ur-source-modal-codemirror"></div>
         </div>
 
         <!-- Modal Footer: Cancel & Save -->
@@ -125,7 +106,8 @@ import {
   InlineEditor, 
   BalloonEditor, 
   DecoupledEditor,
-  Markdown
+  Markdown,
+  createCodeEditor
 } from './dist/ckeditor.js';
 
 export default {
@@ -195,7 +177,7 @@ export default {
       isFullscreen: false,
       isSourceModalOpen: false,
       sourceModalContent: '',
-      sourceLineCount: 1,
+      codeEditorInstance: null,
       pasteTimeout: null
     };
   },
@@ -276,6 +258,14 @@ export default {
     }
   },
   beforeDestroy() {
+    const overlay = this.$refs.sourceModalOverlay;
+    if (overlay && overlay.parentNode === document.body) {
+      overlay.parentNode.removeChild(overlay);
+    }
+    if (this.codeEditorInstance) {
+      this.codeEditorInstance.destroy();
+      this.codeEditorInstance = null;
+    }
     if (this.pasteTimeout) {
       clearTimeout(this.pasteTimeout);
     }
@@ -586,19 +576,58 @@ export default {
         content = this.formatHtml(content);
       }
       this.sourceModalContent = content;
-      this.updateLineCount();
       this.isSourceModalOpen = true;
 
       this.$nextTick(() => {
-        if (this.$refs.sourceTextarea) {
-          this.$refs.sourceTextarea.focus();
-          this.$refs.sourceTextarea.setSelectionRange(0, 0);
+        const overlay = this.$refs.sourceModalOverlay;
+        if (overlay && overlay.parentNode !== document.body) {
+          document.body.appendChild(overlay);
+        }
+
+        const container = this.$refs.sourceEditorContainer;
+        if (!container) return;
+
+        if (this.codeEditorInstance) {
+          this.codeEditorInstance.destroy();
+          this.codeEditorInstance = null;
+        }
+
+        container.innerHTML = '';
+        if (typeof createCodeEditor === 'function') {
+          this.codeEditorInstance = createCodeEditor(container, {
+            value: this.sourceModalContent,
+            mode: this.format.toLowerCase() === 'markdown' ? 'markdown' : 'html',
+            onChange: (newVal) => {
+              this.sourceModalContent = newVal;
+            },
+            onSave: () => {
+              this.saveSourceModal();
+            },
+            onEscape: () => {
+              this.closeSourceModal();
+            }
+          });
+
+          setTimeout(() => {
+            if (this.codeEditorInstance) {
+              this.codeEditorInstance.focus();
+            }
+          }, 60);
         }
       });
+
       this.$emit('source-modal-open');
     },
 
     closeSourceModal() {
+      const overlay = this.$refs.sourceModalOverlay;
+      if (overlay && overlay.parentNode === document.body && this.$el) {
+        this.$el.appendChild(overlay);
+      }
+      if (this.codeEditorInstance) {
+        this.codeEditorInstance.destroy();
+        this.codeEditorInstance = null;
+      }
       this.isSourceModalOpen = false;
       this.sourceModalContent = '';
       if (this.instance && this.instance.editing && this.instance.editing.view) {
@@ -609,7 +638,7 @@ export default {
 
     saveSourceModal() {
       if (!this.instance) return;
-      const newContent = this.sourceModalContent;
+      const newContent = this.codeEditorInstance ? this.codeEditorInstance.getValue() : this.sourceModalContent;
       this.isSettingData = true;
       this.instance.setData(newContent);
       this.lastEmittedValue = newContent;
@@ -617,32 +646,6 @@ export default {
       this.$nextTick(() => {
         this.isSettingData = false;
         this.closeSourceModal();
-      });
-    },
-
-    updateLineCount() {
-      const lines = (this.sourceModalContent || '').split('\n').length;
-      this.sourceLineCount = Math.max(1, lines);
-    },
-
-    syncGutterScroll() {
-      if (this.$refs.sourceGutter && this.$refs.sourceTextarea) {
-        this.$refs.sourceGutter.scrollTop = this.$refs.sourceTextarea.scrollTop;
-      }
-    },
-
-    handleTabKey(event) {
-      const textarea = event.target;
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const spaces = '  ';
-      this.sourceModalContent = 
-        this.sourceModalContent.substring(0, start) +
-        spaces +
-        this.sourceModalContent.substring(end);
-      this.updateLineCount();
-      this.$nextTick(() => {
-        textarea.selectionStart = textarea.selectionEnd = start + spaces.length;
       });
     },
 
@@ -659,6 +662,12 @@ export default {
   width: 100%;
   position: relative;
   box-sizing: border-box;
+
+  /* Elevated z-index when Fullscreen mode is active */
+  &.ur-editor-is-fullscreen,
+  &.is-fullscreen {
+    z-index: 100005 !important;
+  }
 
   /* 1. Classic Editor: Chiá»u cao & Cuá»™n cho WYSIWYG & Source Editing */
   &.mode-classic,
@@ -836,7 +845,7 @@ export default {
   height: 100vh;
   background: rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(2px);
-  z-index: 100000;
+  z-index: 1000001 !important; /* LuÃ´n ná»•i trÃªn fullscreen (--ck-z-fullscreen: 10000, --ck-z-dialog: 100000) */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -914,47 +923,17 @@ export default {
   overflow: hidden;
 }
 
-.ur-source-modal-gutter {
-  width: 52px;
-  flex-shrink: 0;
-  padding: 14px 10px 14px 0;
-  text-align: right;
-  user-select: none;
-  color: #94a3b8;
-  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size: 13px;
-  line-height: 20px;
-  overflow: hidden;
-  background: #ffffff;
-  border-right: 1px solid #e2e8f0;
-  box-sizing: border-box;
-
-  .ur-source-modal-line-number {
-    height: 20px;
-    line-height: 20px;
-  }
-}
-
-.ur-source-modal-textarea {
+.ur-source-modal-codemirror {
+  width: 100%;
+  height: 100%;
   flex: 1 1 0px;
-  min-width: 0;
-  padding: 14px 16px;
-  margin: 0;
-  border: none;
-  outline: none;
-  resize: none;
-  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size: 13px;
-  line-height: 20px;
-  color: #1e293b;
-  background: #ffffff;
-  overflow: auto;
-  white-space: pre;
-  tab-size: 2;
-  box-sizing: border-box;
+  min-height: 0;
+  position: relative;
+  display: flex;
 
-  &::placeholder {
-    color: #cbd5e1;
+  .cm-editor {
+    width: 100%;
+    height: 100%;
   }
 }
 

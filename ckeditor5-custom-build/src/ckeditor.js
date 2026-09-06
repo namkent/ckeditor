@@ -83,6 +83,117 @@ import '@ckeditor/ckeditor5-emoji/dist/index.css';
 import '@ckeditor/ckeditor5-bookmark/dist/index.css';
 import './custom.css';
 
+// CodeMirror 6 Modules
+import { EditorView, basicSetup } from 'codemirror';
+import { EditorState } from '@codemirror/state';
+import { html } from '@codemirror/lang-html';
+import { markdown } from '@codemirror/lang-markdown';
+import { keymap } from '@codemirror/view';
+import { indentWithTab } from '@codemirror/commands';
+
+/**
+ * Factory helper to initialize CodeMirror 6 inside modal
+ */
+function createCodeEditor(parent, options = {}) {
+  const isMarkdown = options.mode === 'markdown';
+  const languageExtension = isMarkdown ? markdown() : html();
+
+  const theme = EditorView.theme({
+    "&": {
+      height: "100%",
+      fontSize: "13px",
+      fontFamily: 'SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+      backgroundColor: "#ffffff"
+    },
+    ".cm-scroller": {
+      overflow: "auto",
+      fontFamily: "inherit"
+    },
+    ".cm-gutters": {
+      backgroundColor: "#ffffff",
+      color: "#94a3b8",
+      borderRight: "1px solid #e2e8f0",
+      paddingRight: "6px"
+    },
+    ".cm-activeLineGutter": {
+      backgroundColor: "#f1f5f9",
+      color: "#0f172a"
+    },
+    ".cm-activeLine": {
+      backgroundColor: "#f8fafc"
+    },
+    ".cm-content": {
+      padding: "12px 14px",
+      caretColor: "#0f172a"
+    },
+    ".cm-cursor": {
+      borderLeftColor: "#0f172a"
+    },
+    "&.cm-focused": {
+      outline: "none"
+    }
+  });
+
+  const extensions = [
+    basicSetup,
+    languageExtension,
+    keymap.of([
+      indentWithTab,
+      {
+        key: 'Mod-s',
+        run: () => {
+          if (typeof options.onSave === 'function') {
+            options.onSave();
+            return true;
+          }
+          return false;
+        }
+      },
+      {
+        key: 'Escape',
+        run: () => {
+          if (typeof options.onEscape === 'function') {
+            options.onEscape();
+            return true;
+          }
+          return false;
+        }
+      }
+    ]),
+    theme
+  ];
+
+  if (typeof options.onChange === 'function') {
+    extensions.push(EditorView.updateListener.of(update => {
+      if (update.docChanged) {
+        options.onChange(update.state.doc.toString());
+      }
+    }));
+  }
+
+  const state = EditorState.create({
+    doc: options.value || '',
+    extensions
+  });
+
+  const view = new EditorView({
+    state,
+    parent
+  });
+
+  return {
+    view,
+    getValue: () => view.state.doc.toString(),
+    setValue: (text) => {
+      view.dispatch({
+        changes: { from: 0, to: view.state.doc.length, insert: text || '' }
+      });
+    },
+    focus: () => view.focus(),
+    destroy: () => view.destroy()
+  };
+}
+
 /**
  * EnhancedSourceEditing Plugin
  * Opens a modal dialog for source code editing instead of in-place DOM replacement.
@@ -325,6 +436,7 @@ ClassicEditor.Bookmark = Bookmark;
 ClassicEditor.Indent = Indent;
 ClassicEditor.IndentBlock = IndentBlock;
 ClassicEditor.EnhancedSourceEditing = EnhancedSourceEditing;
+ClassicEditor.createCodeEditor = createCodeEditor;
 
 export {
   ClassicEditor,
@@ -337,7 +449,8 @@ export {
   Bookmark,
   Indent,
   IndentBlock,
-  EnhancedSourceEditing
+  EnhancedSourceEditing,
+  createCodeEditor
 };
 
 export default ClassicEditor;
