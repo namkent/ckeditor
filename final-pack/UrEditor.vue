@@ -100,7 +100,7 @@
             class="ur-source-modal-btn ur-source-modal-btn-save" 
             @click="saveSourceModal"
           >
-            Save
+            Confirm
           </button>
         </div>
       </div>
@@ -1120,14 +1120,32 @@ export default {
         flex-shrink: 0 !important;
       }
 
+      /* Scroll duy nháº¥t: chá»‰ wrapper bÃªn ngoÃ i má»›i cuá»™n */
       .ck-decoupled-editable-wrapper {
         flex: 1 1 0px !important;
         min-height: 0 !important;
         height: 100% !important;
         overflow-y: auto !important;
+        overflow-x: hidden !important;
+      }
+
+      /* VÃ¹ng chá»©a editor (giáº¥y A4) giÃ£n tá»± nhiÃªn theo ná»™i dung, khÃ´ng cuá»™n bÃªn trong */
+      .ck-decoupled-editable {
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+      }
+
+      /* CKEditor táº¡o .ck-editor__editable_inline bÃªn trong â€“ pháº£i táº¯t overflow auto cá»§a nÃ³ */
+      .ck.ck-editor__editable.ck-editor__editable_inline,
+      .ck-editor__editable_inline {
+        overflow: visible !important;
+        height: auto !important;
+        min-height: 120px !important; /* Äáº£m báº£o cÃ³ thá»ƒ gÃµ vÃ o editor rá»—ng */
       }
     }
   }
+
 
   /* 2. Read-only State */
   &.is-readonly,
@@ -1281,7 +1299,7 @@ export default {
   color: #64748b;
   font-size: 18px;
   line-height: 1;
-  padding: 6px 10px;
+  padding: 6px 8px;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
