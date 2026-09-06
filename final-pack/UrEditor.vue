@@ -281,8 +281,12 @@ export default {
     source() {
       if (this.mode === 'edit') this.reinitEditor();
     },
-    preserveStyles() {
+    preserveStyles(newVal) {
       if (this.mode === 'edit') this.reinitEditor();
+      if (!newVal) this.removePreviewStyles();
+    },
+    savedStyleBlock() {
+      this.injectPreviewStyles();
     }
   },
   mounted() {
@@ -291,6 +295,7 @@ export default {
     }
   },
   beforeDestroy() {
+    this.removePreviewStyles();
     const overlay = this.$refs.sourceModalOverlay;
     if (overlay && overlay.parentNode === document.body) {
       overlay.parentNode.removeChild(overlay);
@@ -483,6 +488,11 @@ export default {
           this.isSettingData = false;
         }
 
+        // Inject saved style block into editor DOM for WYSIWYG preview parity
+        this.$nextTick(() => {
+          this.injectPreviewStyles();
+        });
+
         // Apply readonly
         if (this.readonly) {
           this.updateReadOnly(true);
@@ -611,6 +621,7 @@ export default {
     async destroyEditor() {
       if (this.instance) {
         this.isDestroying = true;
+        this.removePreviewStyles();
         const editor = this.instance;
         this.instance = null;
         try {
@@ -736,12 +747,63 @@ export default {
       this.$emit('input', fullContent);
       this.$nextTick(() => {
         this.isSettingData = false;
+        this.injectPreviewStyles();
         this.closeSourceModal();
       });
     },
 
     openSourceEditing() {
       this.openSourceModal();
+    },
+
+    // â”€â”€ Preview Style Injection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Inject the savedStyleBlock CSS into the CKEditor DOM container so that
+    // the WYSIWYG editable area renders with the email's custom styles,
+    // giving visual parity with the Live Preview panel.
+    extractCssText(styleBlock) {
+      if (!styleBlock) return '';
+      const matches = styleBlock.match(/<style\b[^>]*>([\s\S]*?)<\/style>/gi) || [];
+      return matches
+        .map(m => m.replace(/<style\b[^>]*>/gi, '').replace(/<\/style>/gi, ''))
+        .join('\n');
+    },
+
+    injectPreviewStyles() {
+      if (!this.preserveStyles || !this.savedStyleBlock || !this.instance) {
+        // If conditions not met, ensure any existing injected style is cleaned up
+        if (this.instance) this.removePreviewStyles();
+        return;
+      }
+
+      const styleId = `ur-editor-preview-${this._uid}`;
+      let styleEl = document.getElementById(styleId);
+
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = styleId;
+        styleEl.setAttribute('data-ur-editor', 'preview-styles');
+
+        // Inject into the CKEditor main element container (NOT inside the
+        // contenteditable), so CKEditor won't clear it during rendering.
+        // CSS in the document applies to all DOM including contenteditable.
+        let container = null;
+        try {
+          // Try to find the editor's wrapper UI element
+          if (this.instance.ui && this.instance.ui.view && this.instance.ui.view.element) {
+            container = this.instance.ui.view.element;
+          }
+        } catch (e) { /* ignore */ }
+
+        (container || document.head).appendChild(styleEl);
+      }
+
+      styleEl.textContent = this.extractCssText(this.savedStyleBlock);
+    },
+
+    removePreviewStyles() {
+      const styleId = `ur-editor-preview-${this._uid}`;
+      const styleEl = document.getElementById(styleId);
+      if (styleEl) styleEl.remove();
     }
   }
 };
