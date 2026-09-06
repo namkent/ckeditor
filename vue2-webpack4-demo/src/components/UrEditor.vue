@@ -14,8 +14,8 @@
         'is-view-mode': mode === 'view',
         'ur-editor-is-view-mode': mode === 'view',
         'ur-editor-is-fullscreen': isFullscreen,
-        'is-source-mode': isSourceEditing,
-        'ur-editor-is-source-mode': isSourceEditing,
+        'is-source-mode': isSourceModalOpen,
+        'ur-editor-is-source-mode': isSourceModalOpen,
         'has-custom-height': !!resolvedHeight,
         'has-custom-min-height': !!resolvedMinHeight
       }
@@ -248,6 +248,9 @@ export default {
         styles['--ur-editor-min-height'] = this.resolvedMinHeight;
       }
       return styles;
+    },
+    isSourceEditing() {
+      return this.isSourceModalOpen;
     }
   },
   watch: {
