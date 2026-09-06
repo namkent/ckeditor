@@ -24,7 +24,6 @@ a.ck.ck-powered-by__link {
   flex-direction: column;
   width: 100%;
   border: 1px solid #cbd5e1;
-  border-radius: 4px;
   background: #f8fafc;
   box-sizing: border-box;
 }
@@ -150,10 +149,21 @@ a.ck.ck-powered-by__link {
   margin-bottom: 0.55em;
 }
 
-.ck-content h1 { font-size: 2em; }
-.ck-content h2 { font-size: 1.55em; }
-.ck-content h3 { font-size: 1.25em; }
-.ck-content h4 { font-size: 1.1em; }
+.ck-content h1 {
+  font-size: 2em;
+}
+
+.ck-content h2 {
+  font-size: 1.55em;
+}
+
+.ck-content h3 {
+  font-size: 1.25em;
+}
+
+.ck-content h4 {
+  font-size: 1.1em;
+}
 
 /* FIX BULLET & NUMBERED LISTS (Prevent disappearance from * { padding: 0 }) */
 .ck-content ul,
@@ -188,7 +198,7 @@ a.ck.ck-powered-by__link {
   line-height: 1.65 !important;
 }
 
-.ck-content li > p {
+.ck-content li>p {
   margin-top: 0 !important;
   margin-bottom: 0.35em !important;
 }
@@ -305,8 +315,8 @@ a.ck.ck-powered-by__link {
   --ckeditor-custom-height: 250px;
 }
 
-.ur-editor-wrapper.mode-classic .ck-editor__main > .ck-editor__editable:not(.ck-editor__nested-editable),
-.ckeditor5-component.mode-classic .ck-editor__main > .ck-editor__editable:not(.ck-editor__nested-editable) {
+.ur-editor-wrapper.mode-classic .ck-editor__main>.ck-editor__editable:not(.ck-editor__nested-editable),
+.ckeditor5-component.mode-classic .ck-editor__main>.ck-editor__editable:not(.ck-editor__nested-editable) {
   min-height: var(--ur-editor-custom-height, var(--ckeditor-custom-height, 250px)) !important;
   max-height: var(--ur-editor-custom-height, var(--ckeditor-custom-height, 250px)) !important;
   height: var(--ur-editor-custom-height, var(--ckeditor-custom-height, 250px)) !important;

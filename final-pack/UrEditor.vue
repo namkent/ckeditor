@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div 
     class="ckeditor5-component ur-editor-wrapper" 
     :class="[
@@ -67,7 +67,7 @@
             title="Close"
             @click="closeSourceModal"
           >
-            ✕
+            âœ•
           </button>
         </div>
 
@@ -333,13 +333,13 @@ export default {
         ];
       }
 
-      // Nút sourceEditing / enhancedSourceEditing hỗ trợ khi bật prop source
+      // NÃºt sourceEditing / enhancedSourceEditing há»— trá»£ khi báº­t prop source
       const supportsSource = this.resolvedEditorType === 'classic' || this.resolvedEditorType === 'decoupled';
       if (this.source && supportsSource && !items.includes('enhancedSourceEditing') && !items.includes('sourceEditing')) {
         items.push('|', 'enhancedSourceEditing');
       }
 
-      // Nút fullscreen chỉ hỗ trợ Classic và Decoupled (tắt ở Inline và Balloon để tránh lỗi giao diện)
+      // NÃºt fullscreen chá»‰ há»— trá»£ Classic vÃ  Decoupled (táº¯t á»Ÿ Inline vÃ  Balloon Ä‘á»ƒ trÃ¡nh lá»—i giao diá»‡n)
       const supportsFullscreen = this.resolvedEditorType === 'classic' || this.resolvedEditorType === 'decoupled';
       if (supportsFullscreen && !items.includes('fullscreen')) {
         items.push('|', 'fullscreen');
@@ -366,7 +366,7 @@ export default {
         };
       }
 
-      // Loại bỏ plugin Fullscreen ở mode inline và balloon để tránh lỗi giao diện
+      // Loáº¡i bá» plugin Fullscreen á»Ÿ mode inline vÃ  balloon Ä‘á»ƒ trÃ¡nh lá»—i giao diá»‡n
       if (!supportsFullscreen) {
         const removePlugins = baseConfig.removePlugins ? [...baseConfig.removePlugins] : [];
         if (!removePlugins.includes('Fullscreen')) {
@@ -375,7 +375,7 @@ export default {
         baseConfig.removePlugins = removePlugins;
       }
 
-      // Đăng ký Markdown nếu format = markdown
+      // ÄÄƒng kÃ½ Markdown náº¿u format = markdown
       if (this.format.toLowerCase() === 'markdown' && Markdown) {
         const extraPlugins = baseConfig.extraPlugins ? [...baseConfig.extraPlugins] : [];
         if (!extraPlugins.includes(Markdown)) {
@@ -384,7 +384,7 @@ export default {
         baseConfig.extraPlugins = extraPlugins;
       }
 
-      // Cấu hình Toolbar
+      // Cáº¥u hÃ¬nh Toolbar
       if (!baseConfig.toolbar || !baseConfig.toolbar.items) {
         const toolbarItems = this.getToolbarItems();
         baseConfig.toolbar = Object.assign({}, baseConfig.toolbar, {
@@ -418,7 +418,7 @@ export default {
         const editor = await editorClass.create(container, finalConfig);
         this.instance = editor;
 
-        // Decoupled Editor: Gắn toolbar vào container riêng
+        // Decoupled Editor: Gáº¯n toolbar vÃ o container riÃªng
         if (this.resolvedEditorType === 'decoupled' && this.$refs.toolbarContainer) {
           this.$refs.toolbarContainer.innerHTML = '';
           if (this.toolbar !== 'none') {
@@ -438,7 +438,7 @@ export default {
           this.updateReadOnly(true);
         }
 
-        // Lắng nghe sự kiện toggle fullscreen từ command / plugin
+        // Láº¯ng nghe sá»± kiá»‡n toggle fullscreen tá»« command / plugin
         const fsCmd = editor.commands && (editor.commands.get('toggleFullscreen') || editor.commands.get('fullscreen'));
         if (fsCmd) {
           fsCmd.on('change:value', (evt, name, val) => {
@@ -447,7 +447,7 @@ export default {
           });
         }
 
-        // Lắng nghe sự kiện mở popup Edit Source từ plugin EnhancedSourceEditing
+        // Láº¯ng nghe sá»± kiá»‡n má»Ÿ popup Edit Source tá»« plugin EnhancedSourceEditing
         editor.on('enhancedSourceEditing:open', () => {
           this.openSourceModal();
         });
@@ -652,7 +652,7 @@ export default {
     z-index: 100005 !important;
   }
 
-  /* 1. Classic Editor: Tự nhiên co giãn theo nội dung giống CKEditor 5 tiêu chuẩn */
+  /* 1. Classic Editor: Tá»± nhiÃªn co giÃ£n theo ná»™i dung giá»‘ng CKEditor 5 tiÃªu chuáº©n */
   &.mode-classic,
   &.ur-editor-type-classic {
     .ck-editor__main > .ck-editor__editable:not(.ck-editor__nested-editable) {
@@ -694,7 +694,7 @@ export default {
     padding: 0 !important;
   }
 
-  /* 4. Source Editing Button (ẩn text label, chỉ giữ icon) */
+  /* 4. Source Editing Button (áº©n text label, chá»‰ giá»¯ icon) */
   .ck.ck-button.ck-source-editing-button .ck-button__label {
     display: none !important;
   }
@@ -741,7 +741,7 @@ export default {
   height: 100vh;
   background: rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(2px);
-  z-index: 1000001 !important; /* Luôn nổi trên fullscreen (--ck-z-fullscreen: 10000, --ck-z-dialog: 100000) */
+  z-index: 1000001 !important; /* LuÃ´n ná»•i trÃªn fullscreen (--ck-z-fullscreen: 10000, --ck-z-dialog: 100000) */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -840,7 +840,7 @@ export default {
 
   .cm-content,
   .cm-line {
-    color: #0f172a !important; /* Độ tương phản cao, chữ không bị mờ */
+    color: #0f172a !important; /* Äá»™ tÆ°Æ¡ng pháº£n cao, chá»¯ khÃ´ng bá»‹ má» */
   }
 }
 

@@ -5,7 +5,9 @@
   "main": "dist/ckeditor.js",
   "style": "dist/ckeditor.css",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "copy": "cmd /c copy-to-final-pack.bat --no-pause",
+    "build:pack": "vite build && cmd /c copy-to-final-pack.bat --no-pause"
   },
   "keywords": [
     "ckeditor5",
