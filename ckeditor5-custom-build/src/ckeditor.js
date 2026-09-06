@@ -288,7 +288,7 @@ class AutoCompressUploadAdapter {
         reader.onload = () => {
           const originalDataUrl = reader.result;
 
-          const img = new Image();
+          const img = new window.Image();
           img.onload = () => {
             // 3. Guard: Check if size and dimensions are already small -> skip compression
             const isSizeSmall = file.size <= this.options.sizeThreshold;
