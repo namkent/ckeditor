@@ -119558,7 +119558,7 @@ class mke {
         return this._readAsBase64(e).then((r) => t({ default: r })).catch(n);
       if (!e.type.startsWith("image/") || e.type === "image/svg+xml")
         return this._readAsBase64(e).then((r) => t({ default: r })).catch(n);
-      const s = new FileReader();
+      const s = new window.FileReader();
       s.onload = () => {
         const r = s.result, o = new QI();
         o.onload = () => {
@@ -119586,7 +119586,7 @@ class mke {
   }
   _readAsBase64(e) {
     return new Promise((t, n) => {
-      const s = new FileReader();
+      const s = new window.FileReader();
       s.onload = () => t(s.result), s.onerror = (r) => n(r), s.readAsDataURL(e);
     });
   }

@@ -284,7 +284,7 @@ class AutoCompressUploadAdapter {
           return this._readAsBase64(file).then(dataUrl => resolve({ default: dataUrl })).catch(reject);
         }
 
-        const reader = new FileReader();
+        const reader = new window.FileReader();
         reader.onload = () => {
           const originalDataUrl = reader.result;
 
@@ -347,7 +347,7 @@ class AutoCompressUploadAdapter {
 
   _readAsBase64(file) {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
+      const reader = new window.FileReader();
       reader.onload = () => resolve(reader.result);
       reader.onerror = err => reject(err);
       reader.readAsDataURL(file);
