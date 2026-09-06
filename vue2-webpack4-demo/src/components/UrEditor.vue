@@ -1120,31 +1120,37 @@ export default {
         flex-shrink: 0 !important;
       }
 
-      /* Scroll duy nhất: chỉ wrapper bên ngoài mới cuộn */
+      /* Scroll duy nhất: chỉ wrapper bên ngoài mới cuộn
+         align-items: flex-start: giải phóng paper khỏi bị kéo giãn theo chiều cao wrapper.
+         Không có thuộc tính này (mặc định = stretch), paper bị stretch theo wrapper height
+         → content tràn ra bên dưới paper mà không mở rộng paper ra */
       .ck-decoupled-editable-wrapper {
         flex: 1 1 0px !important;
         min-height: 0 !important;
-        height: 100% !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
+        align-items: flex-start !important; /* KEY: paper tự giãn theo content, không stretch theo wrapper */
       }
 
-      /* Vùng chứa editor (giấy A4) giãn tự nhiên theo nội dung, không cuộn bên trong */
-      .ck-decoupled-editable {
+      /* Vùng chứa giấy A4: giãn tự nhiên theo nội dung, giữ min-height từ custom.css */
+      .ck-decoupled-editable,
+      .ur-editor-decoupled-editable {
         height: auto !important;
-        min-height: 0 !important;
+        /* Không override min-height ở đây → custom.css giữ min-height: 400px cho paper */
         overflow: visible !important;
       }
 
-      /* CKEditor tạo .ck-editor__editable_inline bên trong – phải tắt overflow auto của nó */
+      /* CKEditor thêm class .ck-editor__editable_inline vào editorContainer
+         Default CSS của CKEditor: overflow: auto → tắt để chỉ wrapper scroll */
       .ck.ck-editor__editable.ck-editor__editable_inline,
       .ck-editor__editable_inline {
         overflow: visible !important;
         height: auto !important;
-        min-height: 120px !important; /* Đảm bảo có thể gõ vào editor rỗng */
+        /* min-height: giữ từ .ck-decoupled-editable trong custom.css (400px) */
       }
     }
   }
+
 
 
   /* 2. Read-only State */

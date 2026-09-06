@@ -1120,31 +1120,37 @@ export default {
         flex-shrink: 0 !important;
       }
 
-      /* Scroll duy nháº¥t: chá»‰ wrapper bÃªn ngoÃ i má»›i cuá»™n */
+      /* Scroll duy nháº¥t: chá»‰ wrapper bÃªn ngoÃ i má»›i cuá»™n
+         align-items: flex-start: giáº£i phÃ³ng paper khá»i bá»‹ kÃ©o giÃ£n theo chiá»u cao wrapper.
+         KhÃ´ng cÃ³ thuá»™c tÃ­nh nÃ y (máº·c Ä‘á»‹nh = stretch), paper bá»‹ stretch theo wrapper height
+         â†’ content trÃ n ra bÃªn dÆ°á»›i paper mÃ  khÃ´ng má»Ÿ rá»™ng paper ra */
       .ck-decoupled-editable-wrapper {
         flex: 1 1 0px !important;
         min-height: 0 !important;
-        height: 100% !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
+        align-items: flex-start !important; /* KEY: paper tá»± giÃ£n theo content, khÃ´ng stretch theo wrapper */
       }
 
-      /* VÃ¹ng chá»©a editor (giáº¥y A4) giÃ£n tá»± nhiÃªn theo ná»™i dung, khÃ´ng cuá»™n bÃªn trong */
-      .ck-decoupled-editable {
+      /* VÃ¹ng chá»©a giáº¥y A4: giÃ£n tá»± nhiÃªn theo ná»™i dung, giá»¯ min-height tá»« custom.css */
+      .ck-decoupled-editable,
+      .ur-editor-decoupled-editable {
         height: auto !important;
-        min-height: 0 !important;
+        /* KhÃ´ng override min-height á»Ÿ Ä‘Ã¢y â†’ custom.css giá»¯ min-height: 400px cho paper */
         overflow: visible !important;
       }
 
-      /* CKEditor táº¡o .ck-editor__editable_inline bÃªn trong â€“ pháº£i táº¯t overflow auto cá»§a nÃ³ */
+      /* CKEditor thÃªm class .ck-editor__editable_inline vÃ o editorContainer
+         Default CSS cá»§a CKEditor: overflow: auto â†’ táº¯t Ä‘á»ƒ chá»‰ wrapper scroll */
       .ck.ck-editor__editable.ck-editor__editable_inline,
       .ck-editor__editable_inline {
         overflow: visible !important;
         height: auto !important;
-        min-height: 120px !important; /* Äáº£m báº£o cÃ³ thá»ƒ gÃµ vÃ o editor rá»—ng */
+        /* min-height: giá»¯ tá»« .ck-decoupled-editable trong custom.css (400px) */
       }
     }
   }
+
 
 
   /* 2. Read-only State */
