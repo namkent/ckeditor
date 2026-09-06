@@ -97,6 +97,45 @@
             </div>
           </div>
 
+          <!-- Prop: height -->
+          <div class="prop-control" :class="{ 'is-disabled-prop': currentMode === 'view' }">
+            <label class="prop-label"><code>:height</code> (Wrapper)</label>
+            <div class="btn-toggle-group">
+              <button 
+                class="toggle-btn"
+                :class="{ active: currentHeight === null }"
+                @click="currentHeight = null"
+              >
+                Auto (Tự nhiên)
+              </button>
+              <button 
+                v-for="h in ['350px', '500px']" 
+                :key="h"
+                class="toggle-btn"
+                :class="{ active: currentHeight === h }"
+                @click="currentHeight = h"
+              >
+                {{ h }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Prop: width -->
+          <div class="prop-control">
+            <label class="prop-label"><code>:width</code></label>
+            <div class="btn-toggle-group">
+              <button 
+                v-for="w in ['100%', '850px']" 
+                :key="w"
+                class="toggle-btn"
+                :class="{ active: currentWidth === w }"
+                @click="currentWidth = w"
+              >
+                {{ w }}
+              </button>
+            </div>
+          </div>
+
 
           <!-- Prop: readonly -->
           <div class="prop-control prop-switch" :class="{ 'is-disabled-prop': currentMode === 'view' }">
@@ -188,6 +227,8 @@
               :readonly="isReadOnly"
               :source="isSourceEnabled"
               :toolbar="currentToolbar"
+              :height="currentHeight"
+              :width="currentWidth"
               @ready="onReady"
             />
           </div>
@@ -291,6 +332,24 @@
                     <td><code>'normal'</code></td>
                   </tr>
                   <tr>
+                    <td><code>width</code></td>
+                    <td>String / Number</td>
+                    <td><code>'100%'</code>, <code>'850px'</code>, <code>'80vw'</code>, ...</td>
+                    <td><code>null</code> (100%)</td>
+                  </tr>
+                  <tr>
+                    <td><code>height</code></td>
+                    <td>String / Number</td>
+                    <td><code>'400px'</code>, <code>'60vh'</code>, ... hoặc <code>null</code> (co giãn tự nhiên)</td>
+                    <td><code>null</code> (Auto)</td>
+                  </tr>
+                  <tr>
+                    <td><code>minHeight</code></td>
+                    <td>String / Number</td>
+                    <td><code>'250px'</code>, <code>'300px'</code>, ...</td>
+                    <td><code>null</code></td>
+                  </tr>
+                  <tr>
                     <td><code>config</code></td>
                     <td>Object</td>
                     <td>Ghi đè hoặc mở rộng cấu hình CKEditor</td>
@@ -343,6 +402,8 @@ export default {
       isReadOnly: false,
       isSourceEnabled: true,
       currentToolbar: 'normal',
+      currentHeight: null,
+      currentWidth: '100%',
       activeTab: 'preview',
       toastMessage: '',
       toastTimer: null,

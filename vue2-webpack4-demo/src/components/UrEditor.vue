@@ -15,9 +15,12 @@
         'ur-editor-is-view-mode': mode === 'view',
         'ur-editor-is-fullscreen': isFullscreen,
         'is-source-mode': isSourceEditing,
-        'ur-editor-is-source-mode': isSourceEditing
+        'ur-editor-is-source-mode': isSourceEditing,
+        'has-custom-height': !!resolvedHeight,
+        'has-custom-min-height': !!resolvedMinHeight
       }
     ]"
+    :style="wrapperStyle"
   >
     <!-- VIEW MODE: Pure content display (no editor chrome, no borders, no toolbars) -->
     <div v-if="mode === 'view'" class="ck-view-mode-container ur-editor-view-container ck-content">
@@ -159,6 +162,21 @@ export default {
     config: {
       type: Object,
       default: () => ({})
+    },
+    // width: e.g. '100%', '800px', '75vw', or number (px). Default null (100%)
+    width: {
+      type: [String, Number],
+      default: null
+    },
+    // height: fixed viewport height (e.g. '400px', '50vh', or number in px). Default null (natural auto-expand)
+    height: {
+      type: [String, Number],
+      default: null
+    },
+    // minHeight: minimum initial height (e.g. '250px', '300px', or number in px). Default null
+    minHeight: {
+      type: [String, Number],
+      default: null
     }
   },
   data() {
@@ -193,6 +211,28 @@ export default {
         return this.editor;
       }
       return ClassicEditor;
+    },
+    resolvedWidth() {
+      if (!this.width) return null;
+      return typeof this.width === 'number' || !isNaN(this.width) ? `${this.width}px` : this.width;
+    },
+    resolvedHeight() {
+      if (!this.height || this.height === 'auto') return null;
+      return typeof this.height === 'number' || !isNaN(this.height) ? `${this.height}px` : this.height;
+    },
+    resolvedMinHeight() {
+      if (!this.minHeight) return null;
+      return typeof this.minHeight === 'number' || !isNaN(this.minHeight) ? `${this.minHeight}px` : this.minHeight;
+    },
+    wrapperStyle() {
+      const styles = {};
+      if (this.resolvedWidth) styles.width = this.resolvedWidth;
+      if (this.resolvedHeight) styles.height = this.resolvedHeight;
+      if (this.resolvedMinHeight) {
+        styles.minHeight = this.resolvedMinHeight;
+        styles['--ur-editor-min-height'] = this.resolvedMinHeight;
+      }
+      return styles;
     }
   },
   watch: {
@@ -652,12 +692,92 @@ export default {
     z-index: 100005 !important;
   }
 
-  /* 1. Classic Editor: Tự nhiên co giãn theo nội dung giống CKEditor 5 tiêu chuẩn */
+  /* 1. Classic Editor: Tự nhiên co giãn theo nội dung, hoặc khớp theo prop height */
   &.mode-classic,
   &.ur-editor-type-classic {
     .ck-editor__main > .ck-editor__editable:not(.ck-editor__nested-editable) {
       min-height: 200px;
       box-sizing: border-box;
+    }
+
+    /* KHI TRUYỀN PROP MIN-HEIGHT (nhưng không cố định height) */
+    &.has-custom-min-height:not(.has-custom-height) {
+      .ck-editor__main > .ck-editor__editable:not(.ck-editor__nested-editable) {
+        min-height: var(--ur-editor-min-height, 200px);
+      }
+    }
+
+    /* KHI TRUYỀN PROP HEIGHT: Kích hoạt Flexbox để editor vừa khít chiều cao wrapper và cuộn bên trong */
+    &.has-custom-height {
+      display: flex !important;
+      flex-direction: column !important;
+
+      .ck-standard-wrapper {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 1 0px !important;
+        min-height: 0 !important;
+        height: 100% !important;
+      }
+
+      .ck.ck-editor {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 1 0px !important;
+        min-height: 0 !important;
+        height: 100% !important;
+      }
+
+      .ck.ck-editor__top {
+        flex-shrink: 0 !important;
+      }
+
+      .ck.ck-editor__main {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 1 0px !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        overflow: hidden !important;
+      }
+
+      .ck-editor__main > .ck-editor__editable:not(.ck-editor__nested-editable) {
+        flex: 1 1 0px !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        overflow-y: auto !important;
+        box-sizing: border-box !important;
+      }
+    }
+  }
+
+  /* 2. Decoupled Mode */
+  &.mode-decoupled,
+  &.ur-editor-type-decoupled {
+    /* KHI TRUYỀN PROP HEIGHT: Kích hoạt Flexbox cho Decoupled Editor */
+    &.has-custom-height {
+      display: flex !important;
+      flex-direction: column !important;
+
+      .ck-decoupled-container {
+        height: 100% !important;
+        min-height: 0 !important;
+        flex: 1 1 0px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+      }
+
+      .ck-decoupled-toolbar {
+        flex-shrink: 0 !important;
+      }
+
+      .ck-decoupled-editable-wrapper {
+        flex: 1 1 0px !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        overflow-y: auto !important;
+      }
     }
   }
 
