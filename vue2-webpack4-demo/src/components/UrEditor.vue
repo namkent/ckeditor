@@ -451,6 +451,16 @@ export default {
         });
       }
 
+      // Force-set GHS (GeneralHtmlSupport) to allow ALL elements + class + style attributes.
+      // IMPORTANT: defaultConfig in ckeditor.js uses JSON.parse(JSON.stringify(...)) which
+      // destroys RegExp values. The {name: /.*/} becomes {name: {}} after serialization,
+      // making GHS useless and stripping all div/class attributes. We must override it here.
+      if (!baseConfig.htmlSupport) {
+        baseConfig.htmlSupport = {
+          allow: [{ name: /.*/, attributes: true, classes: true, styles: true }]
+        };
+      }
+
       return baseConfig;
     },
 

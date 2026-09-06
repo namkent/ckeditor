@@ -415,11 +415,25 @@ const defaultConfig = {
   language: 'en'
 };
 
+// Helper to deep-clone a config object while preserving RegExp instances.
+// JSON.parse(JSON.stringify(...)) silently destroys RegExp values (e.g. name: /.*/ → name: {}),
+// breaking GeneralHtmlSupport which needs a real regex to match element names.
+function deepCloneConfig(value) {
+  if (value === null || typeof value !== 'object') return value;
+  if (value instanceof RegExp) return value; // preserve regex as-is
+  if (Array.isArray(value)) return value.map(deepCloneConfig);
+  const cloned = {};
+  for (const key of Object.keys(value)) {
+    cloned[key] = deepCloneConfig(value[key]);
+  }
+  return cloned;
+}
+
 // Helper to wrap create method
 function wrapEditorClass(BaseClass) {
   class CustomEditor extends BaseClass {}
   CustomEditor.builtinPlugins = [...builtinPlugins];
-  CustomEditor.defaultConfig = JSON.parse(JSON.stringify(defaultConfig));
+  CustomEditor.defaultConfig = deepCloneConfig(defaultConfig);
   return CustomEditor;
 }
 
