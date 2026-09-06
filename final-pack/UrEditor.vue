@@ -115,7 +115,7 @@ import {
   BalloonEditor, 
   DecoupledEditor,
   Markdown,
-  createCodeEditor
+  CodeEditor
 } from './dist/ckeditor.js';
 
 export default {
@@ -769,8 +769,8 @@ export default {
         }
 
         container.innerHTML = '';
-        if (typeof createCodeEditor === 'function') {
-          this.codeEditorInstance = createCodeEditor(container, {
+        if (typeof CodeEditor === 'function') {
+          this.codeEditorInstance = CodeEditor(container, {
             value: this.sourceModalContent,
             mode: this.format.toLowerCase() === 'markdown' ? 'markdown' : 'html',
             onChange: (newVal) => {

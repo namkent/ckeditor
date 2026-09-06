@@ -119820,11 +119820,12 @@ kn.Bookmark = TI;
 kn.Indent = Z5;
 kn.IndentBlock = X5;
 kn.EnhancedSourceEditing = B3;
-kn.createCodeEditor = mke;
+kn.CodeEditor = mke;
 export {
   wke as BalloonEditor,
   TI as Bookmark,
   kn as ClassicEditor,
+  mke as CodeEditor,
   Oke as DecoupledEditor,
   O5 as Emoji,
   B3 as EnhancedSourceEditing,
@@ -119833,6 +119834,5 @@ export {
   X5 as IndentBlock,
   bke as InlineEditor,
   Jae as Markdown,
-  mke as createCodeEditor,
   kn as default
 };

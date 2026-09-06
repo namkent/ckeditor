@@ -94,7 +94,7 @@ import { indentWithTab } from '@codemirror/commands';
 /**
  * Factory helper to initialize CodeMirror 6 inside modal
  */
-function createCodeEditor(parent, options = {}) {
+function CodeEditor(parent, options = {}) {
   const isMarkdown = options.mode === 'markdown';
   const languageExtension = isMarkdown ? markdown() : html();
 
@@ -461,7 +461,7 @@ ClassicEditor.Bookmark = Bookmark;
 ClassicEditor.Indent = Indent;
 ClassicEditor.IndentBlock = IndentBlock;
 ClassicEditor.EnhancedSourceEditing = EnhancedSourceEditing;
-ClassicEditor.createCodeEditor = createCodeEditor;
+ClassicEditor.CodeEditor = CodeEditor;
 
 export {
   ClassicEditor,
@@ -475,7 +475,7 @@ export {
   Indent,
   IndentBlock,
   EnhancedSourceEditing,
-  createCodeEditor
+  CodeEditor
 };
 
 export default ClassicEditor;
