@@ -73,7 +73,8 @@ import {
   TableLayout,
   Bookmark,
   Plugin,
-  ButtonView
+  ButtonView,
+  FileRepository
 } from 'ckeditor5';
 import { IconSource } from '@ckeditor/ckeditor5-icons';
 
@@ -243,6 +244,138 @@ class EnhancedSourceEditing extends Plugin {
   }
 }
 
+/**
+ * AutoCompressUploadAdapter
+ * Automatically compresses and resizes oversized images on the client side using HTML5 Canvas
+ * before resolving to Base64 (or sending to server if configured).
+ * 
+ * Guards & Rules:
+ * 1. Animated GIF ('image/gif') is passed through untouched to preserve frames and animation.
+ * 2. Small images (<= 300KB and width <= 1600 && height <= 1600) are passed through untouched.
+ * 3. Transparent PNGs preserve 'image/png' format so transparency is never lost.
+ * 4. JPEGs/other images are resized to max 1600x1600 and compressed with quality 0.82.
+ * 5. Fail-safe: If compressed base64 length >= original length, original is kept.
+ */
+class AutoCompressUploadAdapter {
+  constructor(loader, options = {}) {
+    this.loader = loader;
+    this.options = Object.assign({
+      maxWidth: 1600,
+      maxHeight: 1600,
+      quality: 0.82,
+      sizeThreshold: 300 * 1024 // 300KB
+    }, options);
+  }
+
+  upload() {
+    return this.loader.file.then(file => {
+      return new Promise((resolve, reject) => {
+        if (!file) {
+          return reject(new Error('No file provided to upload adapter'));
+        }
+
+        // 1. Guard: Animated GIF -> keep 100% original
+        if (file.type === 'image/gif') {
+          return this._readAsBase64(file).then(dataUrl => resolve({ default: dataUrl })).catch(reject);
+        }
+
+        // 2. Guard: Non-raster or SVG -> keep original
+        if (!file.type.startsWith('image/') || file.type === 'image/svg+xml') {
+          return this._readAsBase64(file).then(dataUrl => resolve({ default: dataUrl })).catch(reject);
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          const originalDataUrl = reader.result;
+
+          const img = new Image();
+          img.onload = () => {
+            // 3. Guard: Check if size and dimensions are already small -> skip compression
+            const isSizeSmall = file.size <= this.options.sizeThreshold;
+            const isDimensionSmall = img.naturalWidth <= this.options.maxWidth && img.naturalHeight <= this.options.maxHeight;
+
+            if (isSizeSmall && isDimensionSmall) {
+              return resolve({ default: originalDataUrl });
+            }
+
+            try {
+              let width = img.naturalWidth;
+              let height = img.naturalHeight;
+
+              if (width > this.options.maxWidth || height > this.options.maxHeight) {
+                const ratio = Math.min(this.options.maxWidth / width, this.options.maxHeight / height);
+                width = Math.max(1, Math.round(width * ratio));
+                height = Math.max(1, Math.round(height * ratio));
+              }
+
+              const canvas = document.createElement('canvas');
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+
+              ctx.drawImage(img, 0, 0, width, height);
+
+              const isPng = file.type === 'image/png';
+              const outputType = isPng ? 'image/png' : 'image/jpeg';
+              const quality = isPng ? undefined : this.options.quality;
+
+              const compressedDataUrl = canvas.toDataURL(outputType, quality);
+
+              if (compressedDataUrl && compressedDataUrl.length < originalDataUrl.length) {
+                resolve({ default: compressedDataUrl });
+              } else {
+                resolve({ default: originalDataUrl });
+              }
+            } catch (canvasErr) {
+              resolve({ default: originalDataUrl });
+            }
+          };
+
+          img.onerror = () => resolve({ default: originalDataUrl });
+          img.src = originalDataUrl;
+        };
+
+        reader.onerror = err => reject(err);
+        reader.readAsDataURL(file);
+      });
+    });
+  }
+
+  abort() {
+    // Local processing, no server request to cancel
+  }
+
+  _readAsBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = err => reject(err);
+      reader.readAsDataURL(file);
+    });
+  }
+}
+
+/**
+ * AutoCompressUploadAdapterPlugin
+ * Replaces Base64UploadAdapter with our smart AutoCompressUploadAdapter.
+ */
+class AutoCompressUploadAdapterPlugin extends Plugin {
+  static get pluginName() {
+    return 'AutoCompressUploadAdapter';
+  }
+
+  static get requires() {
+    return [FileRepository];
+  }
+
+  init() {
+    const options = this.editor.config.get('imageCompression') || {};
+    this.editor.plugins.get(FileRepository).createUploadAdapter = loader => {
+      return new AutoCompressUploadAdapter(loader, options);
+    };
+  }
+}
+
 // Common Plugin List
 const builtinPlugins = [
   Essentials,
@@ -278,7 +411,7 @@ const builtinPlugins = [
   ImageUpload,
   ImageInsert,
   ImageInsertViaUrl,
-  Base64UploadAdapter,
+  AutoCompressUploadAdapterPlugin,
   MediaEmbed,
   HtmlEmbed,
   CodeBlock,
@@ -386,7 +519,31 @@ const defaultConfig = {
       'toggleImageCaption',
       'imageTextAlternative',
       '|',
-      'linkImage'
+      'linkImage',
+      '|',
+      'resizeImage'
+    ],
+    resizeOptions: [
+      {
+        name: 'resizeImage:original',
+        value: null,
+        icon: 'original'
+      },
+      {
+        name: 'resizeImage:25',
+        value: '25',
+        icon: 'small'
+      },
+      {
+        name: 'resizeImage:50',
+        value: '50',
+        icon: 'medium'
+      },
+      {
+        name: 'resizeImage:75',
+        value: '75',
+        icon: 'large'
+      }
     ]
   },
   table: {
@@ -462,6 +619,7 @@ ClassicEditor.Indent = Indent;
 ClassicEditor.IndentBlock = IndentBlock;
 ClassicEditor.EnhancedSourceEditing = EnhancedSourceEditing;
 ClassicEditor.CodeEditor = CodeEditor;
+ClassicEditor.AutoCompressUploadAdapter = AutoCompressUploadAdapterPlugin;
 
 export {
   ClassicEditor,
@@ -475,7 +633,8 @@ export {
   Indent,
   IndentBlock,
   EnhancedSourceEditing,
-  CodeEditor
+  CodeEditor,
+  AutoCompressUploadAdapterPlugin as AutoCompressUploadAdapter
 };
 
 export default ClassicEditor;
