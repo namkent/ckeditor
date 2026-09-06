@@ -77,7 +77,7 @@
             title="Close"
             @click="closeSourceModal"
           >
-            âœ•
+            ✕
           </button>
         </div>
 
@@ -413,12 +413,12 @@ export default {
         ];
       }
 
-      // NÃºt sourceEditing / enhancedSourceEditing há»— trá»£ trÃªn táº¥t cáº£ cÃ¡c kiá»ƒu editor (Classic, Inline, Balloon, Decoupled) khi báº­t prop source
+      // Nút sourceEditing / enhancedSourceEditing hỗ trợ trên tất cả các kiểu editor (Classic, Inline, Balloon, Decoupled) khi bật prop source
       if (this.source && !items.includes('enhancedSourceEditing') && !items.includes('sourceEditing')) {
         items.push('|', 'enhancedSourceEditing');
       }
 
-      // NÃºt fullscreen chá»‰ há»— trá»£ Classic vÃ  Decoupled (táº¯t á»Ÿ Inline vÃ  Balloon Ä‘á»ƒ trÃ¡nh lá»—i giao diá»‡n)
+      // Nút fullscreen chỉ hỗ trợ Classic và Decoupled (tắt ở Inline và Balloon để tránh lỗi giao diện)
       const supportsFullscreen = this.resolvedEditorType === 'classic' || this.resolvedEditorType === 'decoupled';
       if (supportsFullscreen && !items.includes('fullscreen')) {
         items.push('|', 'fullscreen');
@@ -445,7 +445,7 @@ export default {
         };
       }
 
-      // Loáº¡i bá» plugin Fullscreen á»Ÿ mode inline vÃ  balloon Ä‘á»ƒ trÃ¡nh lá»—i giao diá»‡n
+      // Loại bỏ plugin Fullscreen ở mode inline và balloon để tránh lỗi giao diện
       if (!supportsFullscreen) {
         const removePlugins = baseConfig.removePlugins ? [...baseConfig.removePlugins] : [];
         if (!removePlugins.includes('Fullscreen')) {
@@ -454,7 +454,7 @@ export default {
         baseConfig.removePlugins = removePlugins;
       }
 
-      // ÄÄƒng kÃ½ Markdown náº¿u format = markdown
+      // Đăng ký Markdown nếu format = markdown
       if (this.format.toLowerCase() === 'markdown' && Markdown) {
         const extraPlugins = baseConfig.extraPlugins ? [...baseConfig.extraPlugins] : [];
         if (!extraPlugins.includes(Markdown)) {
@@ -463,7 +463,7 @@ export default {
         baseConfig.extraPlugins = extraPlugins;
       }
 
-      // Cáº¥u hÃ¬nh Toolbar
+      // Cấu hình Toolbar
       if (!baseConfig.toolbar || !baseConfig.toolbar.items) {
         const toolbarItems = this.getToolbarItems();
         baseConfig.toolbar = Object.assign({}, baseConfig.toolbar, {
@@ -507,7 +507,7 @@ export default {
         const editor = await editorClass.create(container, finalConfig);
         this.instance = editor;
 
-        // Decoupled Editor: Gáº¯n toolbar vÃ o container riÃªng
+        // Decoupled Editor: Gắn toolbar vào container riêng
         if (this.resolvedEditorType === 'decoupled' && this.$refs.toolbarContainer) {
           this.$refs.toolbarContainer.innerHTML = '';
           if (this.toolbar !== 'none') {
@@ -533,7 +533,7 @@ export default {
           this.updateReadOnly(true);
         }
 
-        // Láº¯ng nghe sá»± kiá»‡n toggle fullscreen tá»« command / plugin
+        // Lắng nghe sự kiện toggle fullscreen từ command / plugin
         const fsCmd = editor.commands && (editor.commands.get('toggleFullscreen') || editor.commands.get('fullscreen'));
         if (fsCmd) {
           fsCmd.on('change:value', (evt, name, val) => {
@@ -542,7 +542,7 @@ export default {
           });
         }
 
-        // Láº¯ng nghe sá»± kiá»‡n má»Ÿ popup Edit Source tá»« plugin EnhancedSourceEditing
+        // Lắng nghe sự kiện mở popup Edit Source từ plugin EnhancedSourceEditing
         editor.on('enhancedSourceEditing:open', () => {
           this.openSourceModal();
         });
@@ -648,23 +648,23 @@ export default {
       });
     },
 
-    // â”€â”€ Inline Value Auto-Sync â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Inline Value Auto-Sync ────────────────────────────────────────────────
     // Schedules a debounced emit of 'update:inlineValue' so the parent can use
     // :inline-value.sync="myVar" and always have up-to-date CSS-inlined HTML.
     //
     // Key design decisions:
     // 1. LAZY: only runs if parent is listening via $listeners['update:inlineValue']
-    //    â†’ zero overhead when the feature is not used
+    //    → zero overhead when the feature is not used
     // 2. DEBOUNCED: waits `delay` ms after last call before running getInlineHtml()
-    //    â†’ avoids heavy CSS-inlining work on every keystroke (default 500 ms)
+    //    → avoids heavy CSS-inlining work on every keystroke (default 500 ms)
     // 3. ALWAYS EMITS regardless of preserveStyles:
-    //    - preserveStyles = true  â†’ emits HTML with CSS rules inlined into style=""
-    //    - preserveStyles = false â†’ emits the raw HTML (same as v-model value),
+    //    - preserveStyles = true  → emits HTML with CSS rules inlined into style=""
+    //    - preserveStyles = false → emits the raw HTML (same as v-model value),
     //      no CSS inlining needed since there are no <style> blocks
     //
     // @param {number} delay  Debounce delay in ms. Pass 0 to fire immediately.
     scheduleInlineValueUpdate(delay = 500) {
-      // Early exit: parent not listening â†’ zero cost
+      // Early exit: parent not listening → zero cost
       if (!this.$listeners || !this.$listeners['update:inlineValue']) return;
 
       if (this.inlineValueTimer) {
@@ -833,23 +833,23 @@ export default {
     },
 
     handleModalFrameMouseDown(e) {
-      // Cho phÃ©p tÆ°Æ¡ng tÃ¡c bÃ¬nh thÆ°á»ng vá»›i cÃ¡c nÃºt báº¥m hoáº·c input
+      // Cho phép tương tác bình thường với các nút bấm hoặc input
       if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select')) {
         return;
       }
-      // CHá»ˆ cho phÃ©p kÃ©o chá»n text khi click chuá»™t bÃªn trong vÃ¹ng ná»™i dung soáº¡n tháº£o code (.cm-content)
+      // CHỈ cho phép kéo chọn text khi click chuột bên trong vùng nội dung soạn thảo code (.cm-content)
       if (e.target.closest('.cm-content')) {
         return;
       }
-      // Cho phÃ©p tÆ°Æ¡ng tÃ¡c vá»›i thanh cuá»™n scrollbar cá»§a CodeMirror
+      // Cho phép tương tác với thanh cuộn scrollbar của CodeMirror
       if (e.target.classList && e.target.classList.contains('cm-scroller') && e.offsetX > e.target.clientWidth) {
         return;
       }
-      // Cháº·n mousedown trÃªn header, footer, line numbers (gutters), viá»n modal Ä‘á»ƒ ngÄƒn trÃ¬nh duyá»‡t báº¯t Ä‘áº§u selection range
+      // Chặn mousedown trên header, footer, line numbers (gutters), viền modal để ngăn trình duyệt bắt đầu selection range
       e.preventDefault();
     },
 
-    // â”€â”€ Preview Style Injection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Preview Style Injection ──────────────────────────────────────────────
     // Inject the savedStyleBlock CSS into the CKEditor DOM container so that
     // the WYSIWYG editable area renders with the email's custom styles,
     // giving visual parity with the Live Preview panel.
@@ -899,7 +899,7 @@ export default {
       if (styleEl) styleEl.remove();
     },
 
-    // â”€â”€ CSS Inliner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── CSS Inliner ───────────────────────────────────────────────────────────
     // Converts <style> block rules into inline style="" attributes on each element.
     // Perfect for email delivery: Gmail / Outlook strip <style> tags but honour
     // style="" attributes, so inlining ensures the email design is preserved.
@@ -934,11 +934,11 @@ export default {
         return fullHtml;
       }
 
-      // â”€â”€ Step 1: Parse the HTML in a detached document â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      // ── Step 1: Parse the HTML in a detached document ──────────────────────
       const parser = new DOMParser();
       const doc = parser.parseFromString(fullHtml, 'text/html');
 
-      // â”€â”€ Step 2: Parse CSS rules via a temporary <style> element â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      // ── Step 2: Parse CSS rules via a temporary <style> element ───────────
       // We append it to the live document head so the browser parses it as a
       // real CSSStyleSheet (DOMParser does not have a live stylesheet engine).
       const tempStyle = document.createElement('style');
@@ -958,7 +958,7 @@ export default {
         return fullHtml;
       }
 
-      // â”€â”€ Step 3: Apply each CSS rule as inline styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      // ── Step 3: Apply each CSS rule as inline styles ───────────────────────
       // Specificity order: rules are applied in source order (later rules win)
       // so we process them top-to-bottom.  Existing inline styles are preserved
       // and take final precedence (appended last, overriding class-based rules).
@@ -966,7 +966,7 @@ export default {
         // Only process style rules (type 1); skip @media, @keyframes, etc.
         if (!rule.selectorText || rule.type !== 1) continue;
 
-        // Some pseudo-selectors (:hover, ::before) cannot be inlined â€” skip
+        // Some pseudo-selectors (:hover, ::before) cannot be inlined — skip
         const selector = rule.selectorText;
         if (/::|:hover|:focus|:active|:visited|:checked|:nth|:first|:last|:not\(|:is\(|:where\(/.test(selector)) {
           continue;
@@ -976,12 +976,12 @@ export default {
         try {
           elements = doc.querySelectorAll(selector);
         } catch (e) {
-          continue; // invalid selector in the target doc â€” skip
+          continue; // invalid selector in the target doc — skip
         }
 
         if (!elements.length) continue;
 
-        // Build a map of property â†’ value from this rule for efficient merging
+        // Build a map of property → value from this rule for efficient merging
         const ruleDecls = {};
         for (const prop of rule.style) {
           ruleDecls[prop] = rule.style.getPropertyValue(prop).trim() +
@@ -1015,7 +1015,7 @@ export default {
         }
       }
 
-      // â”€â”€ Step 4: Optionally remove <style> tags from output â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      // ── Step 4: Optionally remove <style> tags from output ─────────────────
       if (!keepStyleTag) {
         doc.querySelectorAll('style').forEach(s => s.remove());
       }
@@ -1040,7 +1040,7 @@ export default {
     z-index: 100005 !important;
   }
 
-  /* 1. Classic Editor: Tá»± nhiÃªn co giÃ£n theo ná»™i dung, hoáº·c khá»›p theo prop height */
+  /* 1. Classic Editor: Tự nhiên co giãn theo nội dung, hoặc khớp theo prop height */
   &.mode-classic,
   &.ur-editor-type-classic {
     .ck-editor__main > .ck-editor__editable:not(.ck-editor__nested-editable) {
@@ -1048,14 +1048,14 @@ export default {
       box-sizing: border-box;
     }
 
-    /* KHI TRUYá»€N PROP MIN-HEIGHT (nhÆ°ng khÃ´ng cá»‘ Ä‘á»‹nh height) */
+    /* KHI TRUYỀN PROP MIN-HEIGHT (nhưng không cố định height) */
     &.has-custom-min-height:not(.has-custom-height) {
       .ck-editor__main > .ck-editor__editable:not(.ck-editor__nested-editable) {
         min-height: var(--ur-editor-min-height, 200px);
       }
     }
 
-    /* KHI TRUYá»€N PROP HEIGHT: KÃ­ch hoáº¡t Flexbox Ä‘á»ƒ editor vá»«a khÃ­t chiá»u cao wrapper vÃ  cuá»™n bÃªn trong */
+    /* KHI TRUYỀN PROP HEIGHT: Kích hoạt Flexbox để editor vừa khít chiều cao wrapper và cuộn bên trong */
     &.has-custom-height {
       display: flex !important;
       flex-direction: column !important;
@@ -1102,7 +1102,7 @@ export default {
   /* 2. Decoupled Mode */
   &.mode-decoupled,
   &.ur-editor-type-decoupled {
-    /* KHI TRUYá»€N PROP HEIGHT: KÃ­ch hoáº¡t Flexbox cho Decoupled Editor */
+    /* KHI TRUYỀN PROP HEIGHT: Kích hoạt Flexbox cho Decoupled Editor */
     &.has-custom-height {
       display: flex !important;
       flex-direction: column !important;
@@ -1120,33 +1120,33 @@ export default {
         flex-shrink: 0 !important;
       }
 
-      /* Scroll duy nháº¥t: chá»‰ wrapper bÃªn ngoÃ i má»›i cuá»™n
-         align-items: flex-start: giáº£i phÃ³ng paper khá»i bá»‹ kÃ©o giÃ£n theo chiá»u cao wrapper.
-         KhÃ´ng cÃ³ thuá»™c tÃ­nh nÃ y (máº·c Ä‘á»‹nh = stretch), paper bá»‹ stretch theo wrapper height
-         â†’ content trÃ n ra bÃªn dÆ°á»›i paper mÃ  khÃ´ng má»Ÿ rá»™ng paper ra */
+      /* Scroll duy nhất: chỉ wrapper bên ngoài mới cuộn
+         align-items: flex-start: giải phóng paper khỏi bị kéo giãn theo chiều cao wrapper.
+         Không có thuộc tính này (mặc định = stretch), paper bị stretch theo wrapper height
+         → content tràn ra bên dưới paper mà không mở rộng paper ra */
       .ck-decoupled-editable-wrapper {
         flex: 1 1 0px !important;
         min-height: 0 !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
-        align-items: flex-start !important; /* KEY: paper tá»± giÃ£n theo content, khÃ´ng stretch theo wrapper */
+        align-items: flex-start !important; /* KEY: paper tự giãn theo content, không stretch theo wrapper */
       }
 
-      /* VÃ¹ng chá»©a giáº¥y A4: giÃ£n tá»± nhiÃªn theo ná»™i dung, giá»¯ min-height tá»« custom.css */
+      /* Vùng chứa giấy A4: giãn tự nhiên theo nội dung, giữ min-height từ custom.css */
       .ck-decoupled-editable,
       .ur-editor-decoupled-editable {
         height: auto !important;
-        /* KhÃ´ng override min-height á»Ÿ Ä‘Ã¢y â†’ custom.css giá»¯ min-height: 400px cho paper */
+        /* Không override min-height ở đây → custom.css giữ min-height: 400px cho paper */
         overflow: visible !important;
       }
 
-      /* CKEditor thÃªm class .ck-editor__editable_inline vÃ o editorContainer
-         Default CSS cá»§a CKEditor: overflow: auto â†’ táº¯t Ä‘á»ƒ chá»‰ wrapper scroll */
+      /* CKEditor thêm class .ck-editor__editable_inline vào editorContainer
+         Default CSS của CKEditor: overflow: auto → tắt để chỉ wrapper scroll */
       .ck.ck-editor__editable.ck-editor__editable_inline,
       .ck-editor__editable_inline {
         overflow: visible !important;
         height: auto !important;
-        /* min-height: giá»¯ tá»« .ck-decoupled-editable trong custom.css (400px) */
+        /* min-height: giữ từ .ck-decoupled-editable trong custom.css (400px) */
       }
     }
   }
@@ -1186,7 +1186,7 @@ export default {
     padding: 0 !important;
   }
 
-  /* 4. Source Editing Button (áº©n text label, chá»‰ giá»¯ icon) */
+  /* 4. Source Editing Button (ẩn text label, chỉ giữ icon) */
   .ck.ck-button.ck-source-editing-button .ck-button__label {
     display: none !important;
   }
@@ -1233,7 +1233,7 @@ export default {
   height: 100vh;
   background: rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(2px);
-  z-index: 1000001 !important; /* LuÃ´n ná»•i trÃªn fullscreen (--ck-z-fullscreen: 10000, --ck-z-dialog: 100000) */
+  z-index: 1000001 !important; /* Luôn nổi trên fullscreen (--ck-z-fullscreen: 10000, --ck-z-dialog: 100000) */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1348,7 +1348,7 @@ export default {
     line-height: 1.6 !important;
   }
 
-  /* Táº¯t chá»n text trÃªn gutters, line numbers (sá»‘ dÃ²ng), vÃ  fold indicators */
+  /* Tắt chọn text trên gutters, line numbers (số dòng), và fold indicators */
   .cm-gutters,
   .cm-gutter,
   .cm-lineNumbers,
@@ -1361,14 +1361,14 @@ export default {
     cursor: default !important;
   }
 
-  /* CHá»ˆ cho phÃ©p select text bÃªn trong vÃ¹ng soáº¡n tháº£o code */
+  /* CHỈ cho phép select text bên trong vùng soạn thảo code */
   .cm-content,
   .cm-line {
     user-select: text !important;
     -webkit-user-select: text !important;
     -moz-user-select: text !important;
     -ms-user-select: text !important;
-    color: #0f172a !important; /* Äá»™ tÆ°Æ¡ng pháº£n cao, chá»¯ khÃ´ng bá»‹ má» */
+    color: #0f172a !important; /* Độ tương phản cao, chữ không bị mờ */
   }
 }
 

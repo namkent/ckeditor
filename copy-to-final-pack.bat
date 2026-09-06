@@ -40,7 +40,7 @@ echo.
 echo [2/2] Dang dong bo UrEditor.vue sang final-pack...
 if not exist "%SRC_VUE%" goto :skip_vue
 
-powershell -NoProfile -Command "(Get-Content '%SRC_VUE%' -Raw) -replace '../../../ckeditor5-custom-build/dist/ckeditor.js', './dist/ckeditor.js' | Set-Content '%DEST_VUE%' -Encoding UTF8"
+powershell -NoProfile -Command "(Get-Content '%SRC_VUE%' -Raw -Encoding UTF8) -replace '../../../ckeditor5-custom-build/dist/ckeditor.js', './dist/ckeditor.js' | Set-Content '%DEST_VUE%' -Encoding UTF8"
 echo [OK] Da dong bo UrEditor.vue thanh cong!
 goto :done_vue
 
