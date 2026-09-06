@@ -158,15 +158,15 @@
               </button>
             </div>
 
-            <!-- Prop: source (Admin mode - Classic & Decoupled) -->
-            <div class="prop-control prop-switch" :class="{ 'is-disabled-prop': currentMode === 'view' || (currentEditor !== 'classic' && currentEditor !== 'decoupled') }">
+            <!-- Prop: source (Admin mode - Hỗ trợ tất cả kiểu Editor) -->
+            <div class="prop-control prop-switch" :class="{ 'is-disabled-prop': currentMode === 'view' }">
               <label class="prop-label"><code>:source</code> (Sửa mã nguồn CodeMirror)</label>
               <button 
                 class="switch-btn"
-                :class="{ 'is-on': isSourceEnabled && (currentEditor === 'classic' || currentEditor === 'decoupled') }"
+                :class="{ 'is-on': isSourceEnabled }"
                 @click="isSourceEnabled = !isSourceEnabled"
               >
-                {{ (isSourceEnabled && (currentEditor === 'classic' || currentEditor === 'decoupled')) ? '🛠️ TRUE (Bật Source Edit)' : '🚫 FALSE (Tắt)' }}
+                {{ isSourceEnabled ? '🛠️ TRUE (Bật Source Edit)' : '🚫 FALSE (Tắt)' }}
               </button>
             </div>
           </div>
@@ -332,7 +332,7 @@
                   <tr>
                     <td><code>source</code></td>
                     <td>Boolean</td>
-                    <td><code>true</code> (cho admin sửa mã nguồn), <code>false</code></td>
+                    <td><code>true</code> (bật nút mở popup Source Edit trên mọi kiểu editor), <code>false</code></td>
                     <td><code>false</code></td>
                   </tr>
                   <tr>

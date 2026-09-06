@@ -147,7 +147,7 @@ export default {
       type: Boolean,
       default: false
     },
-    // source editing toggle (ONLY supported in classic mode)
+    // source editing toggle (supported in all modes: classic, inline, balloon, decoupled)
     source: {
       type: Boolean,
       default: false
@@ -373,9 +373,8 @@ export default {
         ];
       }
 
-      // Nút sourceEditing / enhancedSourceEditing hỗ trợ khi bật prop source
-      const supportsSource = this.resolvedEditorType === 'classic' || this.resolvedEditorType === 'decoupled';
-      if (this.source && supportsSource && !items.includes('enhancedSourceEditing') && !items.includes('sourceEditing')) {
+      // Nút sourceEditing / enhancedSourceEditing hỗ trợ trên tất cả các kiểu editor (Classic, Inline, Balloon, Decoupled) khi bật prop source
+      if (this.source && !items.includes('enhancedSourceEditing') && !items.includes('sourceEditing')) {
         items.push('|', 'enhancedSourceEditing');
       }
 
