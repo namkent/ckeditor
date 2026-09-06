@@ -647,14 +647,15 @@ export default {
     //    â†’ zero overhead when the feature is not used
     // 2. DEBOUNCED: waits `delay` ms after last call before running getInlineHtml()
     //    â†’ avoids heavy CSS-inlining work on every keystroke (default 400 ms)
-    // 3. GUARD: skips if preserveStyles is false (inline conversion is a no-op then)
+    // 3. ALWAYS EMITS regardless of preserveStyles:
+    //    - preserveStyles = true  â†’ emits HTML with CSS rules inlined into style=""
+    //    - preserveStyles = false â†’ emits the raw HTML (same as v-model value),
+    //      no CSS inlining needed since there are no <style> blocks
     //
     // @param {number} delay  Debounce delay in ms. Pass 0 to fire immediately.
     scheduleInlineValueUpdate(delay = 400) {
       // Early exit: parent not listening â†’ zero cost
       if (!this.$listeners || !this.$listeners['update:inlineValue']) return;
-      // Early exit: preserveStyles off â†’ inlineHtml === regular html, not useful
-      if (!this.preserveStyles) return;
 
       if (this.inlineValueTimer) {
         clearTimeout(this.inlineValueTimer);
@@ -663,6 +664,7 @@ export default {
       this.inlineValueTimer = setTimeout(() => {
         this.inlineValueTimer = null;
         if (this.isDestroying) return;
+        // getInlineHtml() returns raw HTML when preserveStyles=false (no-op inlining)
         const inlined = this.getInlineHtml();
         this.$emit('update:inlineValue', inlined);
       }, delay);
