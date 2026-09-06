@@ -114,7 +114,13 @@ function createCodeEditor(parent, options = {}) {
       backgroundColor: "#ffffff",
       color: "#64748b",
       borderRight: "1px solid #e2e8f0",
-      paddingRight: "6px"
+      paddingRight: "6px",
+      userSelect: "none",
+      WebkitUserSelect: "none"
+    },
+    ".cm-gutterElement": {
+      userSelect: "none",
+      WebkitUserSelect: "none"
     },
     ".cm-activeLineGutter": {
       backgroundColor: "#f1f5f9",

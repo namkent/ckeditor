@@ -58,8 +58,15 @@
       ref="sourceModalOverlay"
       class="ur-source-modal-overlay"
       @keydown.esc="closeSourceModal"
+      @mousedown.self.prevent
     >
-      <div class="ur-source-modal" role="dialog" aria-modal="true" aria-labelledby="ur-source-modal-title">
+      <div 
+        class="ur-source-modal" 
+        role="dialog" 
+        aria-modal="true" 
+        aria-labelledby="ur-source-modal-title"
+        @mousedown="handleModalFrameMouseDown"
+      >
         <!-- Modal Header -->
         <div class="ur-source-modal-header">
           <h3 id="ur-source-modal-title" class="ur-source-modal-title">Edit source</h3>
@@ -825,6 +832,23 @@ export default {
       this.openSourceModal();
     },
 
+    handleModalFrameMouseDown(e) {
+      // Cho phÃ©p tÆ°Æ¡ng tÃ¡c bÃ¬nh thÆ°á»ng vá»›i cÃ¡c nÃºt báº¥m hoáº·c input
+      if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select')) {
+        return;
+      }
+      // CHá»ˆ cho phÃ©p kÃ©o chá»n text khi click chuá»™t bÃªn trong vÃ¹ng ná»™i dung soáº¡n tháº£o code (.cm-content)
+      if (e.target.closest('.cm-content')) {
+        return;
+      }
+      // Cho phÃ©p tÆ°Æ¡ng tÃ¡c vá»›i thanh cuá»™n scrollbar cá»§a CodeMirror
+      if (e.target.classList && e.target.classList.contains('cm-scroller') && e.offsetX > e.target.clientWidth) {
+        return;
+      }
+      // Cháº·n mousedown trÃªn header, footer, line numbers (gutters), viá»n modal Ä‘á»ƒ ngÄƒn trÃ¬nh duyá»‡t báº¯t Ä‘áº§u selection range
+      e.preventDefault();
+    },
+
     // â”€â”€ Preview Style Injection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Inject the savedStyleBlock CSS into the CKEditor DOM container so that
     // the WYSIWYG editable area renders with the email's custom styles,
@@ -1192,6 +1216,10 @@ export default {
   padding: 20px;
   box-sizing: border-box;
   animation: urModalFadeIn 0.15s ease-out;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
 }
 
 @keyframes urModalFadeIn {
@@ -1212,6 +1240,10 @@ export default {
   overflow: hidden;
   box-sizing: border-box;
   animation: urModalScaleIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
 }
 
 @keyframes urModalScaleIn {
@@ -1227,6 +1259,10 @@ export default {
   background: #ffffff;
   border-bottom: 1px solid #e2e8f0;
   flex-shrink: 0;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
 }
 
 .ur-source-modal-title {
@@ -1235,6 +1271,8 @@ export default {
   font-weight: 700;
   color: #0f172a;
   line-height: 1.4;
+  user-select: none !important;
+  -webkit-user-select: none !important;
 }
 
 .ur-source-modal-close-btn {
@@ -1247,6 +1285,8 @@ export default {
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
+  user-select: none !important;
+  -webkit-user-select: none !important;
 
   &:hover {
     background: #f1f5f9;
@@ -1261,6 +1301,8 @@ export default {
   position: relative;
   background: #ffffff;
   overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .ur-source-modal-codemirror {
@@ -1282,8 +1324,26 @@ export default {
     line-height: 1.6 !important;
   }
 
+  /* Táº¯t chá»n text trÃªn gutters, line numbers (sá»‘ dÃ²ng), vÃ  fold indicators */
+  .cm-gutters,
+  .cm-gutter,
+  .cm-lineNumbers,
+  .cm-gutterElement,
+  .cm-foldGutter {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    cursor: default !important;
+  }
+
+  /* CHá»ˆ cho phÃ©p select text bÃªn trong vÃ¹ng soáº¡n tháº£o code */
   .cm-content,
   .cm-line {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
     color: #0f172a !important; /* Äá»™ tÆ°Æ¡ng pháº£n cao, chá»¯ khÃ´ng bá»‹ má» */
   }
 }
@@ -1297,6 +1357,10 @@ export default {
   background: #f8fafc;
   border-top: 1px solid #e2e8f0;
   flex-shrink: 0;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
 }
 
 .ur-source-modal-btn {
@@ -1310,6 +1374,8 @@ export default {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  user-select: none !important;
+  -webkit-user-select: none !important;
 
   &-cancel {
     background: #ffffff;

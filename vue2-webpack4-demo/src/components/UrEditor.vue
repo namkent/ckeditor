@@ -58,8 +58,15 @@
       ref="sourceModalOverlay"
       class="ur-source-modal-overlay"
       @keydown.esc="closeSourceModal"
+      @mousedown.self.prevent
     >
-      <div class="ur-source-modal" role="dialog" aria-modal="true" aria-labelledby="ur-source-modal-title">
+      <div 
+        class="ur-source-modal" 
+        role="dialog" 
+        aria-modal="true" 
+        aria-labelledby="ur-source-modal-title"
+        @mousedown="handleModalFrameMouseDown"
+      >
         <!-- Modal Header -->
         <div class="ur-source-modal-header">
           <h3 id="ur-source-modal-title" class="ur-source-modal-title">Edit source</h3>
@@ -825,6 +832,23 @@ export default {
       this.openSourceModal();
     },
 
+    handleModalFrameMouseDown(e) {
+      // Cho phép tương tác bình thường với các nút bấm hoặc input
+      if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select')) {
+        return;
+      }
+      // CHỈ cho phép kéo chọn text khi click chuột bên trong vùng nội dung soạn thảo code (.cm-content)
+      if (e.target.closest('.cm-content')) {
+        return;
+      }
+      // Cho phép tương tác với thanh cuộn scrollbar của CodeMirror
+      if (e.target.classList && e.target.classList.contains('cm-scroller') && e.offsetX > e.target.clientWidth) {
+        return;
+      }
+      // Chặn mousedown trên header, footer, line numbers (gutters), viền modal để ngăn trình duyệt bắt đầu selection range
+      e.preventDefault();
+    },
+
     // ── Preview Style Injection ──────────────────────────────────────────────
     // Inject the savedStyleBlock CSS into the CKEditor DOM container so that
     // the WYSIWYG editable area renders with the email's custom styles,
@@ -1192,6 +1216,10 @@ export default {
   padding: 20px;
   box-sizing: border-box;
   animation: urModalFadeIn 0.15s ease-out;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
 }
 
 @keyframes urModalFadeIn {
@@ -1212,6 +1240,10 @@ export default {
   overflow: hidden;
   box-sizing: border-box;
   animation: urModalScaleIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
 }
 
 @keyframes urModalScaleIn {
@@ -1227,6 +1259,10 @@ export default {
   background: #ffffff;
   border-bottom: 1px solid #e2e8f0;
   flex-shrink: 0;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
 }
 
 .ur-source-modal-title {
@@ -1235,6 +1271,8 @@ export default {
   font-weight: 700;
   color: #0f172a;
   line-height: 1.4;
+  user-select: none !important;
+  -webkit-user-select: none !important;
 }
 
 .ur-source-modal-close-btn {
@@ -1247,6 +1285,8 @@ export default {
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
+  user-select: none !important;
+  -webkit-user-select: none !important;
 
   &:hover {
     background: #f1f5f9;
@@ -1261,6 +1301,8 @@ export default {
   position: relative;
   background: #ffffff;
   overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .ur-source-modal-codemirror {
@@ -1282,8 +1324,26 @@ export default {
     line-height: 1.6 !important;
   }
 
+  /* Tắt chọn text trên gutters, line numbers (số dòng), và fold indicators */
+  .cm-gutters,
+  .cm-gutter,
+  .cm-lineNumbers,
+  .cm-gutterElement,
+  .cm-foldGutter {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    cursor: default !important;
+  }
+
+  /* CHỈ cho phép select text bên trong vùng soạn thảo code */
   .cm-content,
   .cm-line {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
     color: #0f172a !important; /* Độ tương phản cao, chữ không bị mờ */
   }
 }
@@ -1297,6 +1357,10 @@ export default {
   background: #f8fafc;
   border-top: 1px solid #e2e8f0;
   flex-shrink: 0;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
 }
 
 .ur-source-modal-btn {
@@ -1310,6 +1374,8 @@ export default {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  user-select: none !important;
+  -webkit-user-select: none !important;
 
   &-cancel {
     background: #ffffff;
