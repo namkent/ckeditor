@@ -814,6 +814,125 @@ export default {
       const styleId = `ur-editor-preview-${this._uid}`;
       const styleEl = document.getElementById(styleId);
       if (styleEl) styleEl.remove();
+    },
+
+    // â”€â”€ CSS Inliner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Converts <style> block rules into inline style="" attributes on each element.
+    // Perfect for email delivery: Gmail / Outlook strip <style> tags but honour
+    // style="" attributes, so inlining ensures the email design is preserved.
+    //
+    // Usage:
+    //   const inlineHtml = this.$refs.editor.getInlineHtml();
+    //   // or pass explicit HTML:
+    //   const inlineHtml = this.$refs.editor.getInlineHtml(someHtml);
+    //
+    // Does NOT modify the editor value or savedStyleBlock.
+    //
+    // @param {string|null} htmlInput  Optional HTML to inline. Defaults to getEditorData().
+    // @param {object} [options]
+    //   @param {boolean} options.keepStyleTag  Default false. If true, keep <style> tag in output too.
+    //   @param {boolean} options.removeClasses  Default false. If true, remove class="" after inlining.
+    // @returns {string}  HTML with all CSS rules inlined into style="" attributes.
+    getInlineHtml(htmlInput = null, options = {}) {
+      const { keepStyleTag = false, removeClasses = false } = options;
+
+      // Source HTML: caller-supplied or current editor output (with <style> block prepended)
+      const fullHtml = htmlInput !== null ? String(htmlInput) : this.getEditorData();
+
+      // If no style block to work with, return as-is
+      const cssText = this.extractCssText(this.savedStyleBlock);
+      if (!cssText || !this.preserveStyles) {
+        return fullHtml;
+      }
+
+      // â”€â”€ Step 1: Parse the HTML in a detached document â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(fullHtml, 'text/html');
+
+      // â”€â”€ Step 2: Parse CSS rules via a temporary <style> element â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      // We append it to the live document head so the browser parses it as a
+      // real CSSStyleSheet (DOMParser does not have a live stylesheet engine).
+      const tempStyle = document.createElement('style');
+      tempStyle.textContent = cssText;
+      document.head.appendChild(tempStyle);
+
+      let sheet = null;
+      try {
+        sheet = tempStyle.sheet;
+      } catch (e) {
+        console.warn('[UrEditor] getInlineHtml: Could not parse stylesheet.', e);
+      } finally {
+        document.head.removeChild(tempStyle);
+      }
+
+      if (!sheet || !sheet.cssRules || !sheet.cssRules.length) {
+        return fullHtml;
+      }
+
+      // â”€â”€ Step 3: Apply each CSS rule as inline styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      // Specificity order: rules are applied in source order (later rules win)
+      // so we process them top-to-bottom.  Existing inline styles are preserved
+      // and take final precedence (appended last, overriding class-based rules).
+      for (const rule of sheet.cssRules) {
+        // Only process style rules (type 1); skip @media, @keyframes, etc.
+        if (!rule.selectorText || rule.type !== 1) continue;
+
+        // Some pseudo-selectors (:hover, ::before) cannot be inlined â€” skip
+        const selector = rule.selectorText;
+        if (/::|:hover|:focus|:active|:visited|:checked|:nth|:first|:last|:not\(|:is\(|:where\(/.test(selector)) {
+          continue;
+        }
+
+        let elements;
+        try {
+          elements = doc.querySelectorAll(selector);
+        } catch (e) {
+          continue; // invalid selector in the target doc â€” skip
+        }
+
+        if (!elements.length) continue;
+
+        // Build a map of property â†’ value from this rule for efficient merging
+        const ruleDecls = {};
+        for (const prop of rule.style) {
+          ruleDecls[prop] = rule.style.getPropertyValue(prop).trim() +
+            (rule.style.getPropertyPriority(prop) === 'important' ? ' !important' : '');
+        }
+
+        for (const el of elements) {
+          // Parse existing inline styles so they can override class-based ones
+          const existingInline = {};
+          const existingAttr = el.getAttribute('style') || '';
+          if (existingAttr) {
+            for (const decl of existingAttr.split(';')) {
+              const [rawProp, ...rest] = decl.split(':');
+              if (rawProp && rest.length) {
+                existingInline[rawProp.trim()] = rest.join(':').trim();
+              }
+            }
+          }
+
+          // Merge: class-rule first, existing inline styles override
+          const merged = Object.assign({}, ruleDecls, existingInline);
+          const mergedStr = Object.entries(merged)
+            .map(([p, v]) => `${p}: ${v}`)
+            .join('; ');
+
+          el.setAttribute('style', mergedStr);
+
+          if (removeClasses) {
+            el.removeAttribute('class');
+          }
+        }
+      }
+
+      // â”€â”€ Step 4: Optionally remove <style> tags from output â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      if (!keepStyleTag) {
+        doc.querySelectorAll('style').forEach(s => s.remove());
+      }
+
+      // Return body innerHTML (preserves the email content div structure)
+      return doc.body.innerHTML;
     }
   }
 };

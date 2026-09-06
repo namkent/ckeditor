@@ -205,6 +205,13 @@
             <span class="stat-label">Ký tự:</span>
             <span class="stat-value">{{ charCount }}</span>
           </div>
+          <button
+            v-if="isPreserveStyles"
+            class="btn btn-inline"
+            @click="generateInlineHtml"
+          >
+            <span class="btn-icon">✉️</span> Xuất HTML Inline
+          </button>
           <button class="btn btn-primary" @click="copyContent">
             <span class="btn-icon">📋</span> Sao chép {{ currentFormat.toUpperCase() }}
           </button>
@@ -243,6 +250,7 @@
 
             <!-- The Custom Vue Component (UrEditor) with all props -->
             <ckeditor-5
+              ref="editorRef"
               v-model="content"
               :mode="currentMode"
               :editor="currentEditor"
@@ -277,6 +285,14 @@
                 &lt;/&gt; Dữ liệu {{ currentFormat.toUpperCase() }}
               </button>
               <button 
+                v-if="isPreserveStyles"
+                class="tab-btn tab-btn-inline" 
+                :class="{ active: activeTab === 'inline' }" 
+                @click="onClickInlineTab"
+              >
+                ✉️ HTML Inline (Gửi Email)
+              </button>
+              <button 
                 class="tab-btn" 
                 :class="{ active: activeTab === 'info' }" 
                 @click="activeTab = 'info'"
@@ -298,6 +314,15 @@
             <!-- Tab 2: Raw Code -->
             <div v-show="activeTab === 'code'" class="raw-code-container">
               <pre class="raw-code"><code>{{ content }}</code></pre>
+            </div>
+
+            <!-- Tab 2b: Inline HTML Output (only when preserveStyles = true) -->
+            <div v-show="activeTab === 'inline'" class="raw-code-container">
+              <div class="inline-tab-header">
+                <span class="inline-tab-badge">✉️ Style đã được inline — sẵn sàng gửi Email</span>
+                <button class="btn btn-primary btn-sm" @click="copyInlineHtml">📋 Sao chép</button>
+              </div>
+              <pre class="raw-code"><code>{{ inlineHtmlOutput }}</code></pre>
             </div>
 
             <!-- Tab 3: Props & API info -->
@@ -438,6 +463,7 @@ export default {
       activeTab: 'preview',
       toastMessage: '',
       toastTimer: null,
+      inlineHtmlOutput: '',
       content: `
         <h2>Bảng dữ liệu cấu hình thử nghiệm 📊</h2>
         <p>Bảng bên dưới đã được khắc phục hoàn toàn lỗi thanh cuộn (scroll) ở từng ô:</p>
@@ -613,6 +639,32 @@ export default {
     clearContent() {
       this.content = '';
       this.showToast('Đã xóa nội dung!');
+    },
+    generateInlineHtml() {
+      const editorComp = this.$refs.editorRef;
+      if (!editorComp || typeof editorComp.getInlineHtml !== 'function') {
+        this.showToast('Trình soạn thảo chưa sẵn sàng hoặc không hỗ trợ tính năng này.');
+        return;
+      }
+      this.inlineHtmlOutput = editorComp.getInlineHtml();
+      this.activeTab = 'inline';
+      this.showToast('Đã xuất HTML Inline! Xem tab ✉️ HTML Inline.');
+    },
+    onClickInlineTab() {
+      // Auto-generate inline HTML when clicking the tab
+      this.activeTab = 'inline';
+      const editorComp = this.$refs.editorRef;
+      if (editorComp && typeof editorComp.getInlineHtml === 'function') {
+        this.inlineHtmlOutput = editorComp.getInlineHtml();
+      }
+    },
+    copyInlineHtml() {
+      if (!this.inlineHtmlOutput) return;
+      navigator.clipboard.writeText(this.inlineHtmlOutput).then(() => {
+        this.showToast('Đã sao chép HTML Inline!');
+      }).catch(() => {
+        this.showToast('Không thể sao chép.');
+      });
     },
     copyContent() {
       navigator.clipboard.writeText(this.content).then(() => {
@@ -1037,6 +1089,41 @@ export default {
 .tab-btn.active {
   background: #2563eb;
   color: #ffffff;
+}
+.tab-btn-inline.active {
+  background: #d97706;
+  color: #ffffff;
+}
+
+/* Inline HTML export UI */
+.btn-inline {
+  background: #92400e;
+  color: #fef3c7;
+  border-color: #d97706;
+}
+.btn-inline:hover {
+  background: #d97706;
+  color: #ffffff;
+}
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+.inline-tab-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+.inline-tab-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fbbf24;
+  background: rgba(217, 119, 6, 0.15);
+  border: 1px solid rgba(217, 119, 6, 0.35);
+  border-radius: 6px;
+  padding: 4px 10px;
 }
 
 /* Tab Content */
