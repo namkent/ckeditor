@@ -18,7 +18,6 @@
         'ur-editor-is-source-mode': isSourceEditing
       }
     ]"
-    :style="componentStyle"
   >
     <!-- VIEW MODE: Pure content display (no editor chrome, no borders, no toolbars) -->
     <div v-if="mode === 'view'" class="ck-view-mode-container ur-editor-view-container ck-content">
@@ -29,10 +28,10 @@
     <!-- EDIT MODE -->
     <template v-else>
       <!-- Decoupled Document Mode -->
-      <div v-if="resolvedEditorType === 'decoupled'" class="ck-decoupled-container ur-editor-decoupled-container" :style="{ height: resolvedHeight }">
+      <div v-if="resolvedEditorType === 'decoupled'" class="ck-decoupled-container ur-editor-decoupled-container">
         <div v-show="toolbar !== 'none'" ref="toolbarContainer" class="ck-decoupled-toolbar ur-editor-decoupled-toolbar"></div>
         <div class="ck-decoupled-editable-wrapper ur-editor-decoupled-editable-wrapper">
-          <div ref="editorContainer" class="ck-decoupled-editable ur-editor-decoupled-editable" :style="{ minHeight: resolvedHeight }"></div>
+          <div ref="editorContainer" class="ck-decoupled-editable ur-editor-decoupled-editable"></div>
         </div>
       </div>
 
@@ -55,7 +54,6 @@
       v-if="isSourceModalOpen" 
       ref="sourceModalOverlay"
       class="ur-source-modal-overlay"
-      @click.self="closeSourceModal"
       @keydown.esc="closeSourceModal"
     >
       <div class="ur-source-modal" role="dialog" aria-modal="true" aria-labelledby="ur-source-modal-title">
@@ -161,11 +159,6 @@ export default {
     config: {
       type: Object,
       default: () => ({})
-    },
-    // height: supports 'px', '%', 'vh', 'em', 'rem', etc. Default '250px'
-    height: {
-      type: [String, Number],
-      default: '250px'
     }
   },
   data() {
@@ -200,16 +193,6 @@ export default {
         return this.editor;
       }
       return ClassicEditor;
-    },
-    resolvedHeight() {
-      if (!this.height) return '250px';
-      return isNaN(this.height) ? this.height : `${this.height}px`;
-    },
-    componentStyle() {
-      return {
-        '--ckeditor-custom-height': this.resolvedHeight,
-        '--ur-editor-custom-height': this.resolvedHeight
-      };
     }
   },
   watch: {
@@ -669,103 +652,16 @@ export default {
     z-index: 100005 !important;
   }
 
-  /* 1. Classic Editor: Chiều cao & Cuộn cho WYSIWYG & Source Editing */
+  /* 1. Classic Editor: Tự nhiên co giãn theo nội dung giống CKEditor 5 tiêu chuẩn */
   &.mode-classic,
   &.ur-editor-type-classic {
     .ck-editor__main > .ck-editor__editable:not(.ck-editor__nested-editable) {
-      min-height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
-      max-height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
-      height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
-      overflow-y: auto !important;
-      box-sizing: border-box !important;
-    }
-
-    /* Đảm bảo các ô trong bảng (nested editables) không bị gán chiều cao của editor */
-    .ck-editor__nested-editable {
-      min-height: unset !important;
-      max-height: unset !important;
-      height: auto !important;
-      overflow-y: visible !important;
-    }
-  }
-
-  /* 2. Decoupled Mode */
-  &.mode-decoupled,
-  &.ur-editor-type-decoupled {
-    .ck-decoupled-container,
-    .ur-editor-decoupled-container {
-      width: 100%;
-      height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 340px));
-      max-height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 340px));
-      border: 1px solid #cbd5e1;
-      border-radius: 4px;
-      overflow: hidden !important;
-      background: #f8fafc;
-      display: flex !important;
-      flex-direction: column !important;
-      box-sizing: border-box !important;
-      position: relative;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    /* Bỏ bo viền dày ở toolbar Decoupled (xóa border của .ck-toolbar bên trong để tránh double border) */
-    .ck-decoupled-toolbar,
-    .ur-editor-decoupled-toolbar {
-      border-bottom: 1px solid #cbd5e1 !important;
-      background: #ffffff !important;
-      flex-shrink: 0 !important;
-      padding: 0 !important;
-      margin: 0 !important;
-
-      .ck.ck-toolbar {
-        border: none !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
-      }
-    }
-
-    /* Vùng cuộn bên trong cho Decoupled: Giới hạn chiều cao tuyệt đối, không để tràn ra ngoài */
-    .ck-decoupled-editable-wrapper,
-    .ur-editor-decoupled-editable-wrapper {
-      flex: 1 1 0px !important;
-      min-height: 0 !important;
-      height: 100% !important;
-      max-height: 100% !important;
-      overflow-y: auto !important;
-      overflow-x: hidden !important;
-      padding: 24px;
-      background: #f8fafc;
-      display: flex !important;
-      justify-content: center !important;
-      box-sizing: border-box !important;
-    }
-
-    .ck-decoupled-editable,
-    .ur-editor-decoupled-editable {
-      width: 100%;
-      max-width: 850px;
-      min-height: 100%;
-      background: #ffffff;
-      padding: 40px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e2e8f0;
-      border-radius: 2px;
+      min-height: 200px;
       box-sizing: border-box;
-      outline: none;
-      overflow: visible !important;
-      overflow-y: visible !important;
-      height: auto !important;
-      max-height: none !important;
-      margin-bottom: 24px;
-
-      &.ck-focused {
-        border: 1px solid var(--ck-color-focus-border, #2977ff) !important;
-        box-shadow: 0 0 0 3px var(--ck-color-focus-outer-shadow, #cae1fc) !important;
-      }
     }
   }
 
-  /* 3. Read-only State */
+  /* 2. Read-only State */
   &.is-readonly,
   &.ur-editor-is-readonly {
     .ck-editor__editable {
@@ -784,7 +680,7 @@ export default {
     }
   }
 
-  /* 4. View Mode */
+  /* 3. View Mode */
   &.is-view-mode,
   &.ur-editor-is-view-mode {
     border: none !important;
@@ -798,19 +694,19 @@ export default {
     padding: 0 !important;
   }
 
-  /* 5. Source Editing Button (ẩn text label, chỉ giữ icon) */
+  /* 4. Source Editing Button (ẩn text label, chỉ giữ icon) */
   .ck.ck-button.ck-source-editing-button .ck-button__label {
     display: none !important;
   }
 
-  /* 6. Table Formatting Cleanup */
+  /* 5. Table Formatting Cleanup */
   .ck-content .table table td,
   .ck-content .table table th {
     overflow: visible !important;
     scrollbar-width: none !important;
   }
 
-  /* 7. Hide CKEditor 5 Powered-By Logo & Watermarks */
+  /* 6. Hide CKEditor 5 Powered-By Logo & Watermarks */
   .ck.ck-powered-by,
   .ck-powered-by,
   .ck.ck-balloon-panel.ck-powered-by-balloon,
@@ -824,7 +720,7 @@ export default {
     overflow: hidden !important;
   }
 
-  /* 8. Heading Dropdown Disabled State */
+  /* 7. Heading Dropdown Disabled State */
   .ck.ck-dropdown.ck-heading-dropdown.ck-disabled .ck-dropdown__button::before,
   .ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button.ck-disabled::before,
   .ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button[aria-disabled="true"]::before {
@@ -883,7 +779,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 20px;
+  padding: 8px 20px;
   background: #ffffff;
   border-bottom: 1px solid #e2e8f0;
   flex-shrink: 0;
@@ -935,6 +831,17 @@ export default {
     width: 100%;
     height: 100%;
   }
+
+  .cm-scroller {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+    font-size: 13px !important;
+    line-height: 1.6 !important;
+  }
+
+  .cm-content,
+  .cm-line {
+    color: #0f172a !important; /* Độ tương phản cao, chữ không bị mờ */
+  }
 }
 
 .ur-source-modal-footer {
@@ -942,7 +849,7 @@ export default {
   justify-content: flex-end;
   align-items: center;
   gap: 12px;
-  padding: 12px 20px;
+  padding: 8px 20px;
   background: #f8fafc;
   border-top: 1px solid #e2e8f0;
   flex-shrink: 0;

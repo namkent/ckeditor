@@ -97,21 +97,6 @@
             </div>
           </div>
 
-          <!-- Prop: height -->
-          <div class="prop-control" :class="{ 'is-disabled-prop': currentMode === 'view' }">
-            <label class="prop-label"><code>:height</code></label>
-            <div class="btn-toggle-group">
-              <button 
-                v-for="h in ['220px', '340px', '460px']" 
-                :key="h"
-                class="toggle-btn"
-                :class="{ active: currentHeight === h }"
-                @click="currentHeight = h"
-              >
-                {{ h }}
-              </button>
-            </div>
-          </div>
 
           <!-- Prop: readonly -->
           <div class="prop-control prop-switch" :class="{ 'is-disabled-prop': currentMode === 'view' }">
@@ -203,7 +188,6 @@
               :readonly="isReadOnly"
               :source="isSourceEnabled"
               :toolbar="currentToolbar"
-              :height="currentHeight"
               @ready="onReady"
             />
           </div>
@@ -307,12 +291,6 @@
                     <td><code>'normal'</code></td>
                   </tr>
                   <tr>
-                    <td><code>height</code></td>
-                    <td>String</td>
-                    <td><code>'250px'</code>, <code>'400px'</code>, <code>'50vh'</code>, <code>'100%'</code></td>
-                    <td><code>'250px'</code></td>
-                  </tr>
-                  <tr>
                     <td><code>config</code></td>
                     <td>Object</td>
                     <td>Ghi đè hoặc mở rộng cấu hình CKEditor</td>
@@ -365,7 +343,6 @@ export default {
       isReadOnly: false,
       isSourceEnabled: true,
       currentToolbar: 'normal',
-      currentHeight: '340px',
       activeTab: 'preview',
       toastMessage: '',
       toastTimer: null,

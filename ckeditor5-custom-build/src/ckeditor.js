@@ -103,7 +103,8 @@ function createCodeEditor(parent, options = {}) {
       height: "100%",
       fontSize: "13px",
       fontFamily: 'SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-      backgroundColor: "#ffffff"
+      backgroundColor: "#ffffff",
+      color: "#0f172a"
     },
     ".cm-scroller": {
       overflow: "auto",
@@ -111,7 +112,7 @@ function createCodeEditor(parent, options = {}) {
     },
     ".cm-gutters": {
       backgroundColor: "#ffffff",
-      color: "#94a3b8",
+      color: "#64748b",
       borderRight: "1px solid #e2e8f0",
       paddingRight: "6px"
     },
@@ -124,7 +125,11 @@ function createCodeEditor(parent, options = {}) {
     },
     ".cm-content": {
       padding: "12px 14px",
-      caretColor: "#0f172a"
+      caretColor: "#0f172a",
+      color: "#0f172a"
+    },
+    ".cm-line": {
+      color: "#0f172a"
     },
     ".cm-cursor": {
       borderLeftColor: "#0f172a"
