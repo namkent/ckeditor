@@ -404,6 +404,7 @@ export default {
           'insertImage',
           'insertTable',
           'blockQuote',
+          'horizontalLine',
           'emoji',
           '|',
           'bulletedList',
