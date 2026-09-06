@@ -101,7 +101,7 @@
           </div>
 
           <!-- HÀNG 2: Kích thước khung & Tính năng nâng cao -->
-          <div class="props-row">
+          <div class="props-row props-row-2">
             <!-- Prop: height -->
             <div class="prop-control" :class="{ 'is-disabled-prop': currentMode === 'view' }">
               <label class="prop-label"><code>:height</code> (Chiều cao Wrapper)</label>
@@ -160,13 +160,25 @@
 
             <!-- Prop: source (Admin mode - Hỗ trợ tất cả kiểu Editor) -->
             <div class="prop-control prop-switch" :class="{ 'is-disabled-prop': currentMode === 'view' }">
-              <label class="prop-label"><code>:source</code> (Sửa mã nguồn CodeMirror)</label>
+              <label class="prop-label"><code>:source</code> (Sửa mã nguồn)</label>
               <button 
                 class="switch-btn"
                 :class="{ 'is-on': isSourceEnabled }"
                 @click="isSourceEnabled = !isSourceEnabled"
               >
-                {{ isSourceEnabled ? '🛠️ TRUE (Bật Source Edit)' : '🚫 FALSE (Tắt)' }}
+                {{ isSourceEnabled ? '🛠️ TRUE (Bật Source)' : '🚫 FALSE (Tắt)' }}
+              </button>
+            </div>
+
+            <!-- Prop: preserveStyles (Email template & custom CSS) -->
+            <div class="prop-control prop-switch" :class="{ 'is-disabled-prop': currentMode === 'view' || currentFormat !== 'html' }">
+              <label class="prop-label"><code>:preserve-styles</code> (Giữ thẻ &lt;style&gt;)</label>
+              <button 
+                class="switch-btn"
+                :class="{ 'is-on': isPreserveStyles }"
+                @click="togglePreserveStyles"
+              >
+                {{ isPreserveStyles ? '🛡️ TRUE (Bảo toàn CSS)' : '🚫 FALSE (Lọc thẻ style)' }}
               </button>
             </div>
           </div>
@@ -177,9 +189,10 @@
       <div class="toolbar-panel">
         <div class="toolbar-left">
           <div class="dropdown-group">
-            <button class="btn btn-outline" @click="loadSample('table')">📊 Mẫu Bảng biểu (Đã sửa scroll)</button>
+            <button class="btn btn-outline" @click="loadSample('table')">📊 Mẫu Bảng biểu</button>
             <button class="btn btn-outline" @click="loadSample('article')">📄 Mẫu Bài viết</button>
             <button class="btn btn-outline" @click="loadSample('code')">💻 Mẫu Lập trình</button>
+            <button class="btn btn-outline btn-email-sample" @click="loadSample('email')">📧 Mẫu Email Template (Custom CSS)</button>
           </div>
         </div>
 
@@ -239,6 +252,7 @@
               :toolbar="currentToolbar"
               :height="currentHeight"
               :width="currentWidth"
+              :preserve-styles="isPreserveStyles"
               @ready="onReady"
             />
           </div>
@@ -360,6 +374,12 @@
                     <td><code>null</code></td>
                   </tr>
                   <tr>
+                    <td><code>preserveStyles</code></td>
+                    <td>Boolean</td>
+                    <td><code>true</code> (bảo toàn thẻ &lt;style&gt; cho Email Template &amp; custom CSS), <code>false</code></td>
+                    <td><code>false</code></td>
+                  </tr>
+                  <tr>
                     <td><code>config</code></td>
                     <td>Object</td>
                     <td>Ghi đè hoặc mở rộng cấu hình CKEditor</td>
@@ -411,6 +431,7 @@ export default {
       currentFormat: 'html',
       isReadOnly: false,
       isSourceEnabled: true,
+      isPreserveStyles: false,
       currentToolbar: 'normal',
       currentHeight: null,
       currentWidth: '100%',
@@ -495,6 +516,10 @@ export default {
       }
       this.showToast(`Đã chuyển sang định dạng: ${fmt.toUpperCase()}`);
     },
+    togglePreserveStyles() {
+      this.isPreserveStyles = !this.isPreserveStyles;
+      this.showToast(`Chế độ preserveStyles: ${this.isPreserveStyles ? 'BẬT (Bảo toàn thẻ <style>)' : 'TẮT (Lọc thẻ <style>)'}`);
+    },
     onReady() {},
     loadSample(type) {
       if (type === 'article') {
@@ -507,6 +532,81 @@ export default {
         this.content = `<h2>Bảng dữ liệu cấu hình</h2><figure class="table"><table style="width:100%; border:1px solid #cbd5e1;"><thead><tr style="background:#f1f5f9;"><th>Chế độ</th><th>Thanh công cụ</th><th>Mục đích</th></tr></thead><tbody><tr><td>Classic</td><td>Cố định</td><td>CMS, Bài viết</td></tr><tr><td>Inline</td><td>Nổi theo focus</td><td>In-place Edit</td></tr><tr><td>Balloon</td><td>Bong bóng khi bôi đen</td><td>Medium / Notion</td></tr><tr><td>Decoupled</td><td>Ghim độc lập</td><td>Tài liệu A4</td></tr></tbody></table></figure>`;
       } else if (type === 'code') {
         this.content = `<h2>Mẫu mã nguồn tích hợp</h2><pre><code class="language-html">&lt;ckeditor-5\n  v-model="content"\n  mode="edit"\n  editor="classic"\n  toolbar="full"\n  height="400px"\n/&gt;</code></pre>`;
+      } else if (type === 'email') {
+        this.isPreserveStyles = true;
+        this.currentFormat = 'html';
+        this.content = `<style type="text/css">
+  .email-wrapper {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    font-family: Arial, sans-serif;
+    border: 1px solid #e2e8f0;
+  }
+  .email-header {
+    background: linear-gradient(135deg, #4f46e5, #06b6d4);
+    color: #ffffff;
+    padding: 24px;
+    text-align: center;
+  }
+  .email-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #ffffff;
+  }
+  .email-body {
+    padding: 24px;
+    color: #334155;
+    line-height: 1.6;
+  }
+  .email-cta-box {
+    text-align: center;
+    margin: 20px 0;
+  }
+  .email-cta-btn {
+    display: inline-block;
+    background: #4f46e5;
+    color: #ffffff !important;
+    padding: 12px 28px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  .email-footer {
+    background: #f8fafc;
+    padding: 16px;
+    text-align: center;
+    font-size: 12px;
+    color: #94a3b8;
+    border-top: 1px solid #e2e8f0;
+  }
+</style>
+<div class="email-wrapper">
+  <div class="email-header">
+    <span class="email-badge">THÔNG BÁO QUAN TRỌNG</span>
+    <h2 style="margin: 8px 0 0 0; color: #ffffff;">Chào mừng bạn đến với UrEditor!</h2>
+  </div>
+  <div class="email-body">
+    <p>Xin chào quý khách hàng,</p>
+    <p>Email này là mẫu kiểm thử thực tế cho tính năng <code>:preserve-styles="true"</code> của component <strong>UrEditor</strong>.</p>
+    <p>Toàn bộ thẻ <code>&lt;style type="text/css"&gt;...&lt;/style&gt;</code> được bảo vệ trọn vẹn và tự động hòa trộn lại khi lưu hoặc sửa mã nguồn.</p>
+    <div class="email-cta-box">
+      <a href="https://github.com" class="email-cta-btn">Khám phá Tính năng &rarr;</a>
+    </div>
+    <p style="font-size: 13px; color: #64748b;">Bạn có thể mở modal <strong>Source Edit</strong> để chỉnh sửa các class CSS trên và kiểm chứng kết quả trực tiếp!</p>
+  </div>
+  <div class="email-footer">
+    &copy; 2026 Hệ thống Doanh nghiệp. Email gửi tự động, vui lòng không phản hồi.
+  </div>
+</div>`;
       }
       this.showToast('Đã tải nội dung mẫu!');
     },
@@ -734,14 +834,26 @@ export default {
   border-color: #10b981;
 }
 
+.props-row-2 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+@media (max-width: 1450px) {
+  .props-row-2 {
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  }
+}
+
 @media (max-width: 1250px) {
-  .props-row {
+  .props-row,
+  .props-row-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 680px) {
-  .props-row {
+  .props-row,
+  .props-row-2 {
     grid-template-columns: 1fr;
   }
 }

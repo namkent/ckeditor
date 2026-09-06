@@ -177,6 +177,11 @@ export default {
     minHeight: {
       type: [String, Number],
       default: null
+    },
+    // preserveStyles: keeps <style>...</style> blocks for email templates & custom styling
+    preserveStyles: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -189,7 +194,8 @@ export default {
       isSourceModalOpen: false,
       sourceModalContent: '',
       codeEditorInstance: null,
-      pasteTimeout: null
+      pasteTimeout: null,
+      savedStyleBlock: ''
     };
   },
   computed: {
@@ -238,10 +244,11 @@ export default {
   watch: {
     value(newVal) {
       if (this.instance && !this.isSettingData && this.mode === 'edit') {
-        const currentData = this.instance.getData();
+        const currentData = this.getEditorData();
         if (newVal !== currentData && newVal !== this.lastEmittedValue) {
           this.isSettingData = true;
-          this.instance.setData(newVal || '');
+          const cleanVal = this.processIncomingHtml(newVal, true);
+          this.instance.setData(cleanVal || '');
           this.$nextTick(() => {
             this.isSettingData = false;
           });
@@ -272,6 +279,9 @@ export default {
       if (this.mode === 'edit') this.reinitEditor();
     },
     source() {
+      if (this.mode === 'edit') this.reinitEditor();
+    },
+    preserveStyles() {
       if (this.mode === 'edit') this.reinitEditor();
     }
   },
@@ -468,7 +478,8 @@ export default {
         // Set initial data
         if (this.value) {
           this.isSettingData = true;
-          editor.setData(this.value);
+          const cleanInitData = this.processIncomingHtml(this.value, true);
+          editor.setData(cleanInitData || '');
           this.isSettingData = false;
         }
 
@@ -494,7 +505,7 @@ export default {
         // Data change listener
         editor.model.document.on('change:data', () => {
           if (this.isSettingData || this.isDestroying) return;
-          const data = editor.getData();
+          const data = this.getEditorData();
           this.lastEmittedValue = data;
           this.$emit('input', data);
         });
@@ -513,7 +524,7 @@ export default {
           if (this.pasteTimeout) clearTimeout(this.pasteTimeout);
           this.pasteTimeout = setTimeout(() => {
             if (this.instance) {
-              const data = this.instance.getData();
+              const data = this.getEditorData();
               this.lastEmittedValue = data;
               this.$emit('input', data);
             }
@@ -525,6 +536,62 @@ export default {
         console.error('[UrEditor] Initialization error:', err);
         this.$emit('error', err);
       }
+    },
+
+    processIncomingHtml(html, isExternalOrExplicit = false) {
+      if (!html || typeof html !== 'string') {
+        if (isExternalOrExplicit || html === '') {
+          this.savedStyleBlock = '';
+        }
+        return '';
+      }
+      if (!this.preserveStyles || (this.format && this.format.toLowerCase() !== 'html')) {
+        return html;
+      }
+
+      const styleRegex = /<style\b[^>]*>[\s\S]*?<\/style>/gi;
+      const matches = html.match(styleRegex);
+
+      if (matches && matches.length > 0) {
+        this.savedStyleBlock = matches.join('\n');
+        return html.replace(styleRegex, '').trim();
+      } else if (isExternalOrExplicit) {
+        this.savedStyleBlock = '';
+      }
+      return html;
+    },
+
+    processOutgoingHtml(html) {
+      if (!html && html !== '') return '';
+      if (!this.preserveStyles || (this.format && this.format.toLowerCase() !== 'html')) {
+        return html;
+      }
+      if (this.savedStyleBlock) {
+        return `${this.savedStyleBlock}\n${html || ''}`.trim();
+      }
+      return html || '';
+    },
+
+    getEditorData() {
+      if (!this.instance) return '';
+      const rawData = this.instance.getData() || '';
+      return this.processOutgoingHtml(rawData);
+    },
+
+    getData() {
+      return this.getEditorData();
+    },
+
+    setData(data) {
+      if (!this.instance) return;
+      this.isSettingData = true;
+      const cleanVal = this.processIncomingHtml(data, true);
+      this.instance.setData(cleanVal || '');
+      this.lastEmittedValue = this.getEditorData();
+      this.$emit('input', this.lastEmittedValue);
+      this.$nextTick(() => {
+        this.isSettingData = false;
+      });
     },
 
     updateReadOnly(isReadOnly) {
@@ -593,7 +660,7 @@ export default {
 
     openSourceModal() {
       if (!this.instance) return;
-      let content = this.instance.getData() || '';
+      let content = this.getEditorData() || '';
       if (this.format && this.format.toLowerCase() === 'html') {
         content = this.formatHtml(content);
       }
@@ -662,9 +729,11 @@ export default {
       if (!this.instance) return;
       const newContent = this.codeEditorInstance ? this.codeEditorInstance.getValue() : this.sourceModalContent;
       this.isSettingData = true;
-      this.instance.setData(newContent);
-      this.lastEmittedValue = newContent;
-      this.$emit('input', newContent);
+      const cleanContent = this.processIncomingHtml(newContent, true);
+      this.instance.setData(cleanContent || '');
+      const fullContent = this.getEditorData();
+      this.lastEmittedValue = fullContent;
+      this.$emit('input', fullContent);
       this.$nextTick(() => {
         this.isSettingData = false;
         this.closeSourceModal();
