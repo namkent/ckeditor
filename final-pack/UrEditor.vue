@@ -182,6 +182,14 @@ export default {
     preserveStyles: {
       type: Boolean,
       default: false
+    },
+    // inlineValue: bind with .sync to receive auto-updated CSS-inlined HTML.
+    // Only computed & emitted when this listener is present (zero cost otherwise).
+    // Usage: <ckeditor-5 :inline-value.sync="myInlineHtml" />
+    // Debounced 400 ms so every keystroke does NOT trigger a full CSS-inline pass.
+    inlineValue: {
+      type: String,
+      default: null
     }
   },
   data() {
@@ -195,7 +203,8 @@ export default {
       sourceModalContent: '',
       codeEditorInstance: null,
       pasteTimeout: null,
-      savedStyleBlock: ''
+      savedStyleBlock: '',
+      inlineValueTimer: null  // debounce timer for update:inlineValue emit
     };
   },
   computed: {
@@ -287,6 +296,8 @@ export default {
     },
     savedStyleBlock() {
       this.injectPreviewStyles();
+      // Re-emit inline value when style block changes (e.g. after Source Edit save)
+      this.scheduleInlineValueUpdate();
     }
   },
   mounted() {
@@ -296,6 +307,10 @@ export default {
   },
   beforeDestroy() {
     this.removePreviewStyles();
+    if (this.inlineValueTimer) {
+      clearTimeout(this.inlineValueTimer);
+      this.inlineValueTimer = null;
+    }
     const overlay = this.$refs.sourceModalOverlay;
     if (overlay && overlay.parentNode === document.body) {
       overlay.parentNode.removeChild(overlay);
@@ -528,6 +543,8 @@ export default {
           const data = this.getEditorData();
           this.lastEmittedValue = data;
           this.$emit('input', data);
+          // Auto-update inlineValue if parent is listening
+          this.scheduleInlineValueUpdate();
         });
 
         // Event hooks & Clipboard
@@ -547,11 +564,17 @@ export default {
               const data = this.getEditorData();
               this.lastEmittedValue = data;
               this.$emit('input', data);
+              this.scheduleInlineValueUpdate();
             }
           }, 100);
         });
 
         this.$emit('ready', editor);
+
+        // Emit initial inlineValue after data is set
+        this.$nextTick(() => {
+          this.scheduleInlineValueUpdate(0);
+        });
       } catch (err) {
         console.error('[UrEditor] Initialization error:', err);
         this.$emit('error', err);
@@ -611,7 +634,38 @@ export default {
       this.$emit('input', this.lastEmittedValue);
       this.$nextTick(() => {
         this.isSettingData = false;
+        this.scheduleInlineValueUpdate();
       });
+    },
+
+    // â”€â”€ Inline Value Auto-Sync â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Schedules a debounced emit of 'update:inlineValue' so the parent can use
+    // :inline-value.sync="myVar" and always have up-to-date CSS-inlined HTML.
+    //
+    // Key design decisions:
+    // 1. LAZY: only runs if parent is listening via $listeners['update:inlineValue']
+    //    â†’ zero overhead when the feature is not used
+    // 2. DEBOUNCED: waits `delay` ms after last call before running getInlineHtml()
+    //    â†’ avoids heavy CSS-inlining work on every keystroke (default 400 ms)
+    // 3. GUARD: skips if preserveStyles is false (inline conversion is a no-op then)
+    //
+    // @param {number} delay  Debounce delay in ms. Pass 0 to fire immediately.
+    scheduleInlineValueUpdate(delay = 400) {
+      // Early exit: parent not listening â†’ zero cost
+      if (!this.$listeners || !this.$listeners['update:inlineValue']) return;
+      // Early exit: preserveStyles off â†’ inlineHtml === regular html, not useful
+      if (!this.preserveStyles) return;
+
+      if (this.inlineValueTimer) {
+        clearTimeout(this.inlineValueTimer);
+      }
+
+      this.inlineValueTimer = setTimeout(() => {
+        this.inlineValueTimer = null;
+        if (this.isDestroying) return;
+        const inlined = this.getInlineHtml();
+        this.$emit('update:inlineValue', inlined);
+      }, delay);
     },
 
     updateReadOnly(isReadOnly) {

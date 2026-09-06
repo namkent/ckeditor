@@ -261,6 +261,7 @@
               :height="currentHeight"
               :width="currentWidth"
               :preserve-styles="isPreserveStyles"
+              :inline-value.sync="inlineHtmlOutput"
               @ready="onReady"
             />
           </div>
@@ -319,10 +320,10 @@
             <!-- Tab 2b: Inline HTML Output (only when preserveStyles = true) -->
             <div v-show="activeTab === 'inline'" class="raw-code-container">
               <div class="inline-tab-header">
-                <span class="inline-tab-badge">✉️ Style đã được inline — sẵn sàng gửi Email</span>
+                <span class="inline-tab-badge">✉️ Auto-sync — cập nhật sau 400ms khi ngừng gõ</span>
                 <button class="btn btn-primary btn-sm" @click="copyInlineHtml">📋 Sao chép</button>
               </div>
-              <pre class="raw-code"><code>{{ inlineHtmlOutput }}</code></pre>
+              <pre class="raw-code"><code>{{ inlineHtmlOutput || '(Chưa có dữ liệu — bật preserve-styles và chạm vào editor để kích hoạt)' }}</code></pre>
             </div>
 
             <!-- Tab 3: Props & API info -->
@@ -641,22 +642,14 @@ export default {
       this.showToast('Đã xóa nội dung!');
     },
     generateInlineHtml() {
-      const editorComp = this.$refs.editorRef;
-      if (!editorComp || typeof editorComp.getInlineHtml !== 'function') {
-        this.showToast('Trình soạn thảo chưa sẵn sàng hoặc không hỗ trợ tính năng này.');
-        return;
-      }
-      this.inlineHtmlOutput = editorComp.getInlineHtml();
+      // inlineHtmlOutput is already auto-synced via :inline-value.sync
+      // Just navigate to the tab
       this.activeTab = 'inline';
-      this.showToast('Đã xuất HTML Inline! Xem tab ✉️ HTML Inline.');
+      this.showToast('Xem tab ✉️ HTML Inline — dữ liệu tự động cập nhật!');
     },
     onClickInlineTab() {
-      // Auto-generate inline HTML when clicking the tab
+      // inlineHtmlOutput is already auto-synced — just switch tab
       this.activeTab = 'inline';
-      const editorComp = this.$refs.editorRef;
-      if (editorComp && typeof editorComp.getInlineHtml === 'function') {
-        this.inlineHtmlOutput = editorComp.getInlineHtml();
-      }
     },
     copyInlineHtml() {
       if (!this.inlineHtmlOutput) return;
