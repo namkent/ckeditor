@@ -22,143 +22,153 @@
       <section class="props-panel">
         <div class="panel-section-title">⚙️ Bảng cấu hình Props Component (Live Testing)</div>
         
-        <div class="props-grid">
-          <!-- Prop: mode (edit / view) -->
-          <div class="prop-control">
-            <label class="prop-label"><code>:mode</code> (Chế độ hoạt động)</label>
-            <div class="btn-toggle-group">
-              <button 
-                class="toggle-btn" 
-                :class="{ active: currentMode === 'edit' }"
-                @click="setMode('edit')"
-              >
-                ✏️ EDIT (Soạn thảo)
-              </button>
-              <button 
-                class="toggle-btn" 
-                :class="{ active: currentMode === 'view' }"
-                @click="setMode('view')"
-              >
-                👁️ VIEW (Chỉ hiển thị)
-              </button>
+        <div class="props-rows-container">
+          <!-- HÀNG 1: Các thiết lập chính của Editor -->
+          <div class="props-row">
+            <!-- Prop: mode (edit / view) -->
+            <div class="prop-control">
+              <label class="prop-label"><code>:mode</code> (Chế độ hoạt động)</label>
+              <div class="btn-toggle-group">
+                <button 
+                  class="toggle-btn" 
+                  :class="{ active: currentMode === 'edit' }"
+                  @click="setMode('edit')"
+                >
+                  ✏️ EDIT (Soạn thảo)
+                </button>
+                <button 
+                  class="toggle-btn" 
+                  :class="{ active: currentMode === 'view' }"
+                  @click="setMode('view')"
+                >
+                  👁️ VIEW (Chỉ hiển thị)
+                </button>
+              </div>
+            </div>
+
+            <!-- Prop: editor -->
+            <div class="prop-control" :class="{ 'is-disabled-prop': currentMode === 'view' }">
+              <label class="prop-label"><code>:editor</code> (Kiểu Editor)</label>
+              <div class="btn-toggle-group">
+                <button 
+                  v-for="mode in ['classic', 'inline', 'balloon', 'decoupled']" 
+                  :key="mode"
+                  class="toggle-btn"
+                  :class="{ active: currentEditor === mode }"
+                  @click="setEditorMode(mode)"
+                >
+                  {{ mode.toUpperCase() }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Prop: format -->
+            <div class="prop-control">
+              <label class="prop-label"><code>:format</code> (Định dạng)</label>
+              <div class="btn-toggle-group">
+                <button 
+                  class="toggle-btn" 
+                  :class="{ active: currentFormat === 'html' }"
+                  @click="setFormat('html')"
+                >
+                  HTML
+                </button>
+                <button 
+                  class="toggle-btn" 
+                  :class="{ active: currentFormat === 'markdown' }"
+                  @click="setFormat('markdown')"
+                >
+                  MARKDOWN
+                </button>
+              </div>
+            </div>
+
+            <!-- Prop: toolbar -->
+            <div class="prop-control" :class="{ 'is-disabled-prop': currentMode === 'view' }">
+              <label class="prop-label"><code>:toolbar</code> (Thanh công cụ)</label>
+              <div class="btn-toggle-group">
+                <button 
+                  v-for="tb in ['none', 'normal', 'full']" 
+                  :key="tb"
+                  class="toggle-btn"
+                  :class="{ active: currentToolbar === tb }"
+                  @click="currentToolbar = tb"
+                >
+                  {{ tb.toUpperCase() }}
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- Prop: editor -->
-          <div class="prop-control" :class="{ 'is-disabled-prop': currentMode === 'view' }">
-            <label class="prop-label"><code>:editor</code> (Kiểu trình soạn thảo)</label>
-            <div class="btn-toggle-group">
+          <!-- HÀNG 2: Kích thước khung & Tính năng nâng cao -->
+          <div class="props-row">
+            <!-- Prop: height -->
+            <div class="prop-control" :class="{ 'is-disabled-prop': currentMode === 'view' }">
+              <label class="prop-label"><code>:height</code> (Chiều cao Wrapper)</label>
+              <div class="btn-toggle-group">
+                <button 
+                  class="toggle-btn"
+                  :class="{ active: currentHeight === null }"
+                  @click="currentHeight = null"
+                >
+                  Auto (Tự nhiên)
+                </button>
+                <button 
+                  v-for="h in ['350px', '500px']" 
+                  :key="h"
+                  class="toggle-btn"
+                  :class="{ active: currentHeight === h }"
+                  @click="currentHeight = h"
+                >
+                  {{ h }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Prop: width -->
+            <div class="prop-control">
+              <label class="prop-label"><code>:width</code> (Chiều rộng Wrapper)</label>
+              <div class="btn-toggle-group">
+                <button 
+                  class="toggle-btn"
+                  :class="{ active: currentWidth === '100%' }"
+                  @click="currentWidth = '100%'"
+                >
+                  100% (Toàn chiều rộng)
+                </button>
+                <button 
+                  class="toggle-btn"
+                  :class="{ active: currentWidth === '850px' }"
+                  @click="currentWidth = '850px'"
+                >
+                  850px (Khung cố định)
+                </button>
+              </div>
+            </div>
+
+            <!-- Prop: readonly -->
+            <div class="prop-control prop-switch" :class="{ 'is-disabled-prop': currentMode === 'view' }">
+              <label class="prop-label"><code>:readonly</code> (Khóa chỉnh sửa)</label>
               <button 
-                v-for="mode in ['classic', 'inline', 'balloon', 'decoupled']" 
-                :key="mode"
-                class="toggle-btn"
-                :class="{ active: currentEditor === mode }"
-                @click="setEditorMode(mode)"
+                class="switch-btn"
+                :class="{ 'is-on': isReadOnly }"
+                @click="isReadOnly = !isReadOnly"
               >
-                {{ mode.toUpperCase() }}
+                {{ isReadOnly ? '🔒 TRUE (Khóa sửa)' : '✏️ FALSE (Cho phép sửa)' }}
               </button>
             </div>
-          </div>
 
-          <!-- Prop: format -->
-          <div class="prop-control">
-            <label class="prop-label"><code>:format</code></label>
-            <div class="btn-toggle-group">
+            <!-- Prop: source (Admin mode - Classic & Decoupled) -->
+            <div class="prop-control prop-switch" :class="{ 'is-disabled-prop': currentMode === 'view' || (currentEditor !== 'classic' && currentEditor !== 'decoupled') }">
+              <label class="prop-label"><code>:source</code> (Sửa mã nguồn CodeMirror)</label>
               <button 
-                class="toggle-btn" 
-                :class="{ active: currentFormat === 'html' }"
-                @click="setFormat('html')"
+                class="switch-btn"
+                :class="{ 'is-on': isSourceEnabled && (currentEditor === 'classic' || currentEditor === 'decoupled') }"
+                @click="isSourceEnabled = !isSourceEnabled"
               >
-                HTML
-              </button>
-              <button 
-                class="toggle-btn" 
-                :class="{ active: currentFormat === 'markdown' }"
-                @click="setFormat('markdown')"
-              >
-                MARKDOWN
+                {{ (isSourceEnabled && (currentEditor === 'classic' || currentEditor === 'decoupled')) ? '🛠️ TRUE (Bật Source Edit)' : '🚫 FALSE (Tắt)' }}
               </button>
             </div>
-          </div>
-
-          <!-- Prop: toolbar -->
-          <div class="prop-control" :class="{ 'is-disabled-prop': currentMode === 'view' }">
-            <label class="prop-label"><code>:toolbar</code></label>
-            <div class="btn-toggle-group">
-              <button 
-                v-for="tb in ['none', 'normal', 'full']" 
-                :key="tb"
-                class="toggle-btn"
-                :class="{ active: currentToolbar === tb }"
-                @click="currentToolbar = tb"
-              >
-                {{ tb.toUpperCase() }}
-              </button>
-            </div>
-          </div>
-
-          <!-- Prop: height -->
-          <div class="prop-control" :class="{ 'is-disabled-prop': currentMode === 'view' }">
-            <label class="prop-label"><code>:height</code> (Wrapper)</label>
-            <div class="btn-toggle-group">
-              <button 
-                class="toggle-btn"
-                :class="{ active: currentHeight === null }"
-                @click="currentHeight = null"
-              >
-                Auto (Tự nhiên)
-              </button>
-              <button 
-                v-for="h in ['350px', '500px']" 
-                :key="h"
-                class="toggle-btn"
-                :class="{ active: currentHeight === h }"
-                @click="currentHeight = h"
-              >
-                {{ h }}
-              </button>
-            </div>
-          </div>
-
-          <!-- Prop: width -->
-          <div class="prop-control">
-            <label class="prop-label"><code>:width</code></label>
-            <div class="btn-toggle-group">
-              <button 
-                v-for="w in ['100%', '850px']" 
-                :key="w"
-                class="toggle-btn"
-                :class="{ active: currentWidth === w }"
-                @click="currentWidth = w"
-              >
-                {{ w }}
-              </button>
-            </div>
-          </div>
-
-
-          <!-- Prop: readonly -->
-          <div class="prop-control prop-switch" :class="{ 'is-disabled-prop': currentMode === 'view' }">
-            <label class="prop-label"><code>:readonly</code></label>
-            <button 
-              class="switch-btn"
-              :class="{ 'is-on': isReadOnly }"
-              @click="isReadOnly = !isReadOnly"
-            >
-              {{ isReadOnly ? '🔒 TRUE (Khóa sửa)' : '✏️ FALSE (Cho phép)' }}
-            </button>
-          </div>
-
-          <!-- Prop: source (Admin mode - Classic & Decoupled) -->
-          <div class="prop-control prop-switch" :class="{ 'is-disabled-prop': currentMode === 'view' || (currentEditor !== 'classic' && currentEditor !== 'decoupled') }">
-            <label class="prop-label"><code>:source</code> (Classic / Decoupled)</label>
-            <button 
-              class="switch-btn"
-              :class="{ 'is-on': isSourceEnabled && (currentEditor === 'classic' || currentEditor === 'decoupled') }"
-              @click="isSourceEnabled = !isSourceEnabled"
-            >
-              {{ (isSourceEnabled && (currentEditor === 'classic' || currentEditor === 'decoupled')) ? '🛠️ TRUE (Bật Source)' : '🚫 FALSE (Tắt)' }}
-            </button>
           </div>
         </div>
       </section>
@@ -623,70 +633,117 @@ export default {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-.props-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
-  gap: 14px;
-  align-items: center;
+.props-rows-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
+
+.props-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px 20px;
+  align-items: stretch;
+}
+
 .prop-control {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 6px;
+  min-width: 0;
 }
+
 .prop-control.is-disabled-prop {
   opacity: 0.45;
   pointer-events: none;
 }
+
 .prop-label {
   font-size: 12px;
   color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 .prop-label code {
   color: #38bdf8;
   font-weight: 600;
 }
+
 .btn-toggle-group {
   display: flex;
   background: #0b0f19;
   border: 1px solid #1e293b;
   border-radius: 8px;
   overflow: hidden;
-  padding: 2px;
+  padding: 3px;
+  height: 38px;
+  min-height: 38px;
+  box-sizing: border-box;
 }
+
 .toggle-btn {
   flex: 1;
   background: transparent;
   border: none;
   color: #94a3b8;
-  padding: 6px 8px;
+  padding: 6px 10px;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   border-radius: 6px;
   transition: all 0.15s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
 }
+
 .toggle-btn.active {
   background: #2563eb;
   color: #ffffff;
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
 }
+
 .switch-btn {
   background: #0b0f19;
   border: 1px solid #334155;
   color: #cbd5e1;
-  padding: 8px 12px;
+  padding: 6px 14px;
   font-size: 12px;
   font-weight: 600;
   border-radius: 8px;
   cursor: pointer;
   text-align: center;
   transition: all 0.2s ease;
+  height: 38px;
+  min-height: 38px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 }
+
 .switch-btn.is-on {
   background: rgba(16, 185, 129, 0.2);
   color: #34d399;
   border-color: #10b981;
+}
+
+@media (max-width: 1250px) {
+  .props-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .props-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Toolbar Panel */
