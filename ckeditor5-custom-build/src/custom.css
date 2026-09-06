@@ -18,44 +18,93 @@ a.ck.ck-powered-by__link {
 /* =======================================================
    DECOUPLED DOCUMENT EDITOR CONTAINER
    ======================================================= */
-.ck-decoupled-container {
-  display: flex;
-  flex-direction: column;
+.ck-decoupled-container,
+.ur-editor-decoupled-container {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100%;
+  height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 340px));
+  max-height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 340px));
   border: 1px solid #cbd5e1;
   border-radius: 4px;
-  overflow: hidden;
+  overflow: hidden !important;
   background: #f8fafc;
+  box-sizing: border-box !important;
+  position: relative;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.ck-decoupled-toolbar {
-  border-bottom: 1px solid #cbd5e1;
-  background: #ffffff;
+.ck-decoupled-toolbar,
+.ur-editor-decoupled-toolbar {
+  border-bottom: 1px solid #cbd5e1 !important;
+  background: #ffffff !important;
   position: sticky;
   top: 0;
   z-index: 20;
+  flex-shrink: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
-.ck-decoupled-editable-wrapper {
+/* Xóa border của .ck-toolbar bên trong decoupled toolbar để tránh bị double border dày cộm */
+.ck-decoupled-toolbar .ck.ck-toolbar,
+.ur-editor-decoupled-toolbar .ck.ck-toolbar {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.ck-decoupled-editable-wrapper,
+.ur-editor-decoupled-editable-wrapper {
+  flex: 1 1 0px !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
   padding: 24px;
-  background: #f1f5f9;
-  display: flex;
-  justify-content: center;
-  overflow-y: auto;
+  background: #f8fafc;
+  display: flex !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
 }
 
-.ck-decoupled-editable {
-  width: 100%;
-  max-width: 850px;
-  min-height: 400px;
-  background: #ffffff;
-  padding: 40px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
+.ck-decoupled-editable,
+.ur-editor-decoupled-editable {
+  width: 100% !important;
+  max-width: 850px !important;
+  min-height: 100% !important;
+  background: #ffffff !important;
+  padding: 40px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 2px !important;
+  box-sizing: border-box !important;
+  outline: none !important;
   overflow: visible !important;
   overflow-y: visible !important;
   height: auto !important;
   max-height: none !important;
+  margin-bottom: 24px;
+}
+
+.ck-decoupled-editable.ck-focused,
+.ur-editor-decoupled-editable.ck-focused {
+  border: 1px solid var(--ck-color-focus-border, #2977ff) !important;
+  box-shadow: 0 0 0 3px var(--ck-color-focus-outer-shadow, #cae1fc) !important;
+}
+
+/* Decoupled Source Editing Focus Border: hiển thị viền xanh khi active giống Classic mode */
+.ck-decoupled-container .ck-source-editing-area.ck-focused {
+  border: 1px solid var(--ck-color-focus-border, #2977ff) !important;
+  box-shadow: var(--ck-focus-outer-shadow, 0 0 0 3px #cae1fc) !important;
+  outline: none !important;
+}
+
+.ck-decoupled-container:focus-within:has(.ck-source-editing-area),
+.ck-decoupled-container:has(.ck-source-editing-area.ck-focused) {
+  border-color: var(--ck-color-focus-border, #2977ff) !important;
+  box-shadow: var(--ck-focus-outer-shadow, 0 0 0 3px #cae1fc) !important;
 }
 
 /* =======================================================

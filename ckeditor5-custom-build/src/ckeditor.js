@@ -45,7 +45,6 @@ import {
   FontColor,
   FontBackgroundColor,
   Highlight,
-  SourceEditing,
   GeneralHtmlSupport,
   WordCount,
   FindAndReplace,
@@ -72,14 +71,55 @@ import {
   PictureEditing,
   TableScroll,
   TableLayout,
-  Bookmark
+  Bookmark,
+  Plugin,
+  ButtonView
 } from 'ckeditor5';
+import { IconSource } from '@ckeditor/ckeditor5-icons';
 
 import 'ckeditor5/ckeditor5.css';
 import '@ckeditor/ckeditor5-fullscreen/dist/index.css';
 import '@ckeditor/ckeditor5-emoji/dist/index.css';
 import '@ckeditor/ckeditor5-bookmark/dist/index.css';
 import './custom.css';
+
+/**
+ * EnhancedSourceEditing Plugin
+ * Opens a modal dialog for source code editing instead of in-place DOM replacement.
+ */
+class EnhancedSourceEditing extends Plugin {
+  static get pluginName() {
+    return 'EnhancedSourceEditing';
+  }
+
+  init() {
+    const editor = this.editor;
+    const t = editor.locale.t;
+
+    const createBtn = () => {
+      const buttonView = new ButtonView(editor.locale);
+      buttonView.set({
+        label: t('Source'),
+        icon: IconSource,
+        tooltip: true,
+        class: 'ck-source-editing-button ur-enhanced-source-editing-button'
+      });
+
+      // Automatically disable when editor is in read-only mode
+      buttonView.bind('isEnabled').to(editor, 'isReadOnly', isReadOnly => !isReadOnly);
+
+      buttonView.on('execute', () => {
+        editor.fire('enhancedSourceEditing:open');
+      });
+
+      return buttonView;
+    };
+
+    // Register both aliases so configurations with either name work seamlessly
+    editor.ui.componentFactory.add('enhancedSourceEditing', createBtn);
+    editor.ui.componentFactory.add('sourceEditing', createBtn);
+  }
+}
 
 // Common Plugin List
 const builtinPlugins = [
@@ -149,7 +189,7 @@ const builtinPlugins = [
   TableScroll,
   TableLayout,
   Bookmark,
-  SourceEditing,
+  EnhancedSourceEditing,
   GeneralHtmlSupport,
   WordCount
 ];
@@ -211,7 +251,7 @@ const defaultConfig = {
       'showBlocks',
       'selectAll',
       'fullscreen',
-      'sourceEditing'
+      'enhancedSourceEditing'
     ],
     shouldNotGroupWhenFull: true
   },
@@ -284,6 +324,7 @@ ClassicEditor.Emoji = Emoji;
 ClassicEditor.Bookmark = Bookmark;
 ClassicEditor.Indent = Indent;
 ClassicEditor.IndentBlock = IndentBlock;
+ClassicEditor.EnhancedSourceEditing = EnhancedSourceEditing;
 
 export {
   ClassicEditor,
@@ -295,7 +336,8 @@ export {
   Emoji,
   Bookmark,
   Indent,
-  IndentBlock
+  IndentBlock,
+  EnhancedSourceEditing
 };
 
 export default ClassicEditor;

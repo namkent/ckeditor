@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div 
     class="ckeditor5-component ur-editor-wrapper" 
     :class="[
@@ -49,6 +49,73 @@
         ></div>
       </div>
     </template>
+
+    <!-- ENHANCED SOURCE EDITING MODAL DIALOG -->
+    <div 
+      v-if="isSourceModalOpen" 
+      class="ur-source-modal-overlay"
+      @click.self="closeSourceModal"
+      @keydown.esc="closeSourceModal"
+    >
+      <div class="ur-source-modal" role="dialog" aria-modal="true" aria-labelledby="ur-source-modal-title">
+        <!-- Modal Header -->
+        <div class="ur-source-modal-header">
+          <h3 id="ur-source-modal-title" class="ur-source-modal-title">Edit source</h3>
+          <button 
+            type="button" 
+            class="ur-source-modal-close-btn" 
+            aria-label="Close" 
+            title="Close"
+            @click="closeSourceModal"
+          >
+            âœ•
+          </button>
+        </div>
+
+        <!-- Modal Body: Line Numbers + Code Editor -->
+        <div class="ur-source-modal-body">
+          <div ref="sourceGutter" class="ur-source-modal-gutter" aria-hidden="true">
+            <div 
+              v-for="n in sourceLineCount" 
+              :key="n" 
+              class="ur-source-modal-line-number"
+            >{{ n }}</div>
+          </div>
+          <textarea
+            ref="sourceTextarea"
+            v-model="sourceModalContent"
+            class="ur-source-modal-textarea"
+            spellcheck="false"
+            wrap="off"
+            placeholder="Enter source code..."
+            @scroll="syncGutterScroll"
+            @input="updateLineCount"
+            @keydown.tab.prevent="handleTabKey"
+            @keydown.esc.stop="closeSourceModal"
+            @keydown.ctrl.83.prevent.stop="saveSourceModal"
+            @keydown.meta.83.prevent.stop="saveSourceModal"
+          ></textarea>
+        </div>
+
+        <!-- Modal Footer: Cancel & Save -->
+        <div class="ur-source-modal-footer">
+          <button 
+            type="button" 
+            class="ur-source-modal-btn ur-source-modal-btn-cancel" 
+            @click="closeSourceModal"
+          >
+            Cancel
+          </button>
+          <button 
+            type="button" 
+            class="ur-source-modal-btn ur-source-modal-btn-save" 
+            @click="saveSourceModal"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -126,7 +193,9 @@ export default {
       isSettingData: false,
       isDestroying: false,
       isFullscreen: false,
-      isSourceEditing: false,
+      isSourceModalOpen: false,
+      sourceModalContent: '',
+      sourceLineCount: 1,
       pasteTimeout: null
     };
   },
@@ -291,13 +360,13 @@ export default {
         ];
       }
 
-      // Nút sourceEditing hỗ trợ trong Classic Editor và Decoupled Editor khi bật prop source
+      // NÃºt sourceEditing / enhancedSourceEditing há»— trá»£ khi báº­t prop source
       const supportsSource = this.resolvedEditorType === 'classic' || this.resolvedEditorType === 'decoupled';
-      if (this.source && supportsSource && !items.includes('sourceEditing')) {
-        items.push('|', 'sourceEditing');
+      if (this.source && supportsSource && !items.includes('enhancedSourceEditing') && !items.includes('sourceEditing')) {
+        items.push('|', 'enhancedSourceEditing');
       }
 
-      // Nút fullscreen chỉ hỗ trợ Classic và Decoupled (tắt ở Inline và Balloon để tránh lỗi giao diện)
+      // NÃºt fullscreen chá»‰ há»— trá»£ Classic vÃ  Decoupled (táº¯t á»Ÿ Inline vÃ  Balloon Ä‘á»ƒ trÃ¡nh lá»—i giao diá»‡n)
       const supportsFullscreen = this.resolvedEditorType === 'classic' || this.resolvedEditorType === 'decoupled';
       if (supportsFullscreen && !items.includes('fullscreen')) {
         items.push('|', 'fullscreen');
@@ -324,7 +393,7 @@ export default {
         };
       }
 
-      // Loại bỏ plugin Fullscreen ở mode inline và balloon để tránh lỗi giao diện
+      // Loáº¡i bá» plugin Fullscreen á»Ÿ mode inline vÃ  balloon Ä‘á»ƒ trÃ¡nh lá»—i giao diá»‡n
       if (!supportsFullscreen) {
         const removePlugins = baseConfig.removePlugins ? [...baseConfig.removePlugins] : [];
         if (!removePlugins.includes('Fullscreen')) {
@@ -333,7 +402,7 @@ export default {
         baseConfig.removePlugins = removePlugins;
       }
 
-      // Đăng ký Markdown nếu format = markdown
+      // ÄÄƒng kÃ½ Markdown náº¿u format = markdown
       if (this.format.toLowerCase() === 'markdown' && Markdown) {
         const extraPlugins = baseConfig.extraPlugins ? [...baseConfig.extraPlugins] : [];
         if (!extraPlugins.includes(Markdown)) {
@@ -342,7 +411,7 @@ export default {
         baseConfig.extraPlugins = extraPlugins;
       }
 
-      // Cấu hình Toolbar
+      // Cáº¥u hÃ¬nh Toolbar
       if (!baseConfig.toolbar || !baseConfig.toolbar.items) {
         const toolbarItems = this.getToolbarItems();
         baseConfig.toolbar = Object.assign({}, baseConfig.toolbar, {
@@ -376,7 +445,7 @@ export default {
         const editor = await editorClass.create(container, finalConfig);
         this.instance = editor;
 
-        // Decoupled Editor: Gắn toolbar vào container riêng
+        // Decoupled Editor: Gáº¯n toolbar vÃ o container riÃªng
         if (this.resolvedEditorType === 'decoupled' && this.$refs.toolbarContainer) {
           this.$refs.toolbarContainer.innerHTML = '';
           if (this.toolbar !== 'none') {
@@ -396,7 +465,7 @@ export default {
           this.updateReadOnly(true);
         }
 
-        // Lắng nghe sự kiện toggle fullscreen từ command / plugin
+        // Láº¯ng nghe sá»± kiá»‡n toggle fullscreen tá»« command / plugin
         const fsCmd = editor.commands && (editor.commands.get('toggleFullscreen') || editor.commands.get('fullscreen'));
         if (fsCmd) {
           fsCmd.on('change:value', (evt, name, val) => {
@@ -405,33 +474,10 @@ export default {
           });
         }
 
-        // Hỗ trợ SourceEditing cho DecoupledEditor và đồng bộ trạng thái isSourceEditing
-        const sePlugin = editor.plugins.has('SourceEditing') && editor.plugins.get('SourceEditing');
-        if (sePlugin) {
-          sePlugin.on('change:isSourceEditingMode', (evt, name, isSourceEditingMode) => {
-            this.isSourceEditing = !!isSourceEditingMode;
-            if (this.resolvedEditorType === 'decoupled') {
-              if (isSourceEditingMode) {
-                if (typeof sePlugin._hideVisibleDialog === 'function') sePlugin._hideVisibleDialog();
-                if (typeof sePlugin._showSourceEditing === 'function') sePlugin._showSourceEditing();
-                if (typeof sePlugin._disableCommands === 'function') sePlugin._disableCommands();
-              } else {
-                if (typeof sePlugin._hideSourceEditing === 'function') sePlugin._hideSourceEditing();
-                if (typeof sePlugin._enableCommands === 'function') sePlugin._enableCommands();
-              }
-            }
-          });
-          sePlugin.on('change:isEnabled', (evt, name, isEnabled) => {
-            if (typeof sePlugin._handleReadOnlyMode === 'function') {
-              sePlugin._handleReadOnlyMode(!isEnabled);
-            }
-          });
-          editor.on('change:isReadOnly', (evt, name, isReadOnly) => {
-            if (typeof sePlugin._handleReadOnlyMode === 'function') {
-              sePlugin._handleReadOnlyMode(isReadOnly);
-            }
-          });
-        }
+        // Láº¯ng nghe sá»± kiá»‡n má»Ÿ popup Edit Source tá»« plugin EnhancedSourceEditing
+        editor.on('enhancedSourceEditing:open', () => {
+          this.openSourceModal();
+        });
 
         // Data change listener
         editor.model.document.on('change:data', () => {
@@ -503,6 +549,105 @@ export default {
       await this.destroyEditor();
       await this.$nextTick();
       await this.initEditor();
+    },
+
+    formatHtml(html) {
+      if (!html) return '';
+      let formatted = '';
+      let indent = 0;
+      const tab = '  ';
+      const tokens = html.replace(/>\s*</g, '><').match(/(<[^>]+>|[^<]+)/g) || [];
+      const voidTags = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
+
+      for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i].trim();
+        if (!token) continue;
+
+        if (token.startsWith('</')) {
+          indent = Math.max(0, indent - 1);
+          formatted += tab.repeat(indent) + token + '\n';
+        } else if (token.startsWith('<') && !token.startsWith('<!')) {
+          const isSelfClosing = token.endsWith('/>') || voidTags.some(tag => new RegExp(`^<${tag}(\\s|>|$)`, 'i').test(token));
+          formatted += tab.repeat(indent) + token + '\n';
+          if (!isSelfClosing) {
+            indent++;
+          }
+        } else {
+          formatted += tab.repeat(indent) + token + '\n';
+        }
+      }
+      return formatted.trim();
+    },
+
+    openSourceModal() {
+      if (!this.instance) return;
+      let content = this.instance.getData() || '';
+      if (this.format && this.format.toLowerCase() === 'html') {
+        content = this.formatHtml(content);
+      }
+      this.sourceModalContent = content;
+      this.updateLineCount();
+      this.isSourceModalOpen = true;
+
+      this.$nextTick(() => {
+        if (this.$refs.sourceTextarea) {
+          this.$refs.sourceTextarea.focus();
+          this.$refs.sourceTextarea.setSelectionRange(0, 0);
+        }
+      });
+      this.$emit('source-modal-open');
+    },
+
+    closeSourceModal() {
+      this.isSourceModalOpen = false;
+      this.sourceModalContent = '';
+      if (this.instance && this.instance.editing && this.instance.editing.view) {
+        this.instance.editing.view.focus();
+      }
+      this.$emit('source-modal-close');
+    },
+
+    saveSourceModal() {
+      if (!this.instance) return;
+      const newContent = this.sourceModalContent;
+      this.isSettingData = true;
+      this.instance.setData(newContent);
+      this.lastEmittedValue = newContent;
+      this.$emit('input', newContent);
+      this.$nextTick(() => {
+        this.isSettingData = false;
+        this.closeSourceModal();
+      });
+    },
+
+    updateLineCount() {
+      const lines = (this.sourceModalContent || '').split('\n').length;
+      this.sourceLineCount = Math.max(1, lines);
+    },
+
+    syncGutterScroll() {
+      if (this.$refs.sourceGutter && this.$refs.sourceTextarea) {
+        this.$refs.sourceGutter.scrollTop = this.$refs.sourceTextarea.scrollTop;
+      }
+    },
+
+    handleTabKey(event) {
+      const textarea = event.target;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const spaces = '  ';
+      this.sourceModalContent = 
+        this.sourceModalContent.substring(0, start) +
+        spaces +
+        this.sourceModalContent.substring(end);
+      this.updateLineCount();
+      this.$nextTick(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + spaces.length;
+      });
+    },
+
+    openSourceEditing() {
+      this.openSourceModal();
     }
   }
 };
@@ -515,7 +660,7 @@ export default {
   position: relative;
   box-sizing: border-box;
 
-  /* 1. Classic Editor: Chiều cao & Cuộn cho WYSIWYG & Source Editing */
+  /* 1. Classic Editor: Chiá»u cao & Cuá»™n cho WYSIWYG & Source Editing */
   &.mode-classic,
   &.ur-editor-type-classic {
     .ck-editor__main > .ck-editor__editable:not(.ck-editor__nested-editable) {
@@ -526,34 +671,12 @@ export default {
       box-sizing: border-box !important;
     }
 
-    /* Đảm bảo các ô trong bảng (nested editables) không bị gán chiều cao của editor */
+    /* Äáº£m báº£o cÃ¡c Ã´ trong báº£ng (nested editables) khÃ´ng bá»‹ gÃ¡n chiá»u cao cá»§a editor */
     .ck-editor__nested-editable {
       min-height: unset !important;
       max-height: unset !important;
       height: auto !important;
       overflow-y: visible !important;
-    }
-
-    /* Khóa chiều cao cho chế độ edit source (textarea) bằng đúng chiều cao editor */
-    .ck-source-editing-area {
-      min-height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
-      max-height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
-      height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
-      overflow: hidden !important;
-      box-sizing: border-box !important;
-
-      textarea {
-        min-height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
-        max-height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
-        height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 250px)) !important;
-        overflow-y: auto !important;
-        box-sizing: border-box !important;
-        resize: none !important;
-        padding: 16px !important;
-        font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
-        font-size: 13.5px !important;
-        line-height: 1.6 !important;
-      }
     }
   }
 
@@ -562,38 +685,57 @@ export default {
   &.ur-editor-type-decoupled {
     .ck-decoupled-container,
     .ur-editor-decoupled-container {
+      width: 100%;
+      height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 340px));
+      max-height: var(--ckeditor-custom-height, var(--ur-editor-custom-height, 340px));
       border: 1px solid #cbd5e1;
       border-radius: 4px;
-      overflow: hidden;
+      overflow: hidden !important;
       background: #f8fafc;
-      display: flex;
-      flex-direction: column;
-      box-sizing: border-box;
+      display: flex !important;
+      flex-direction: column !important;
+      box-sizing: border-box !important;
+      position: relative;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
+    /* Bá» bo viá»n dÃ y á»Ÿ toolbar Decoupled (xÃ³a border cá»§a .ck-toolbar bÃªn trong Ä‘á»ƒ trÃ¡nh double border) */
     .ck-decoupled-toolbar,
     .ur-editor-decoupled-toolbar {
-      border-bottom: 1px solid #cbd5e1;
-      background: #ffffff;
-      flex-shrink: 0;
+      border-bottom: 1px solid #cbd5e1 !important;
+      background: #ffffff !important;
+      flex-shrink: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+
+      .ck.ck-toolbar {
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
     }
 
+    /* VÃ¹ng cuá»™n bÃªn trong cho Decoupled: Giá»›i háº¡n chiá»u cao tuyá»‡t Ä‘á»‘i, khÃ´ng Ä‘á»ƒ trÃ n ra ngoÃ i */
     .ck-decoupled-editable-wrapper,
     .ur-editor-decoupled-editable-wrapper {
-      flex: 1 1 auto;
-      min-height: 0;
+      flex: 1 1 0px !important;
+      min-height: 0 !important;
+      height: 100% !important;
+      max-height: 100% !important;
       overflow-y: auto !important;
+      overflow-x: hidden !important;
       padding: 24px;
       background: #f8fafc;
-      display: flex;
-      justify-content: center;
-      box-sizing: border-box;
+      display: flex !important;
+      justify-content: center !important;
+      box-sizing: border-box !important;
     }
 
     .ck-decoupled-editable,
     .ur-editor-decoupled-editable {
       width: 100%;
       max-width: 850px;
+      min-height: 100%;
       background: #ffffff;
       padding: 40px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
@@ -605,71 +747,11 @@ export default {
       overflow-y: visible !important;
       height: auto !important;
       max-height: none !important;
-    }
-
-    /* Decoupled Source Editing - Hiển thị 100% full-width & full-height giống Classic Editor */
-    &.ur-editor-is-source-mode .ck-decoupled-editable-wrapper,
-    &.is-source-mode .ck-decoupled-editable-wrapper,
-    .ck-decoupled-editable-wrapper:has(.ck-source-editing-area) {
-      padding: 0 !important;
-      background: #ffffff !important;
-      display: flex !important;
-      flex-direction: column !important;
-      overflow: hidden !important;
-    }
-
-    .ck-source-editing-area {
-      width: 100% !important;
-      max-width: 100% !important;
-      min-width: 100% !important;
-      height: 100% !important;
-      min-height: 0 !important;
-      max-height: 100% !important;
-      flex: 1 1 auto !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      background: #ffffff !important;
-      border: none !important;
-      box-shadow: none !important;
-      border-radius: 0 !important;
-      overflow: hidden !important;
-      display: flex !important;
-      flex-direction: column !important;
-      box-sizing: border-box !important;
+      margin-bottom: 24px;
 
       &.ck-focused {
-        border: none !important;
-        box-shadow: none !important;
-        outline: none !important;
-      }
-
-      textarea {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 100% !important;
-        height: 100% !important;
-        min-height: 0 !important;
-        max-height: 100% !important;
-        flex: 1 1 auto !important;
-        padding: 16px !important;
-        margin: 0 !important;
-        background: #ffffff !important;
-        border: none !important;
-        box-shadow: none !important;
-        outline: none !important;
-        box-sizing: border-box !important;
-        font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
-        font-size: 13.5px !important;
-        line-height: 1.6 !important;
-        overflow-y: auto !important;
-        resize: none !important;
-        color: #1e293b !important;
-
-        &:focus {
-          outline: none !important;
-          box-shadow: none !important;
-          border: none !important;
-        }
+        border: 1px solid var(--ck-color-focus-border, #2977ff) !important;
+        box-shadow: 0 0 0 3px var(--ck-color-focus-outer-shadow, #cae1fc) !important;
       }
     }
   }
@@ -707,7 +789,7 @@ export default {
     padding: 0 !important;
   }
 
-  /* 5. Source Editing Button (ẩn text label, chỉ giữ icon) */
+  /* 5. Source Editing Button (áº©n text label, chá»‰ giá»¯ icon) */
   .ck.ck-button.ck-source-editing-button .ck-button__label {
     display: none !important;
   }
@@ -733,19 +815,194 @@ export default {
     overflow: hidden !important;
   }
 
-  /* 8. Heading Dropdown Disabled State (in Source Edit mode or when disabled)
-     Format tương đồng như button group 'fontFamily' và các button khác ở toolbar:
-     - Cho phép click / focus / hover tooltip bình thường (không dùng pointer-events: none)
-     - Chỉ làm mờ icon 'H' và mũi tên với opacity chuẩn của CKEditor (--ck-disabled-opacity, 0.5)
-  */
+  /* 8. Heading Dropdown Disabled State */
   .ck.ck-dropdown.ck-heading-dropdown.ck-disabled .ck-dropdown__button::before,
   .ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button.ck-disabled::before,
-  .ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button[aria-disabled="true"]::before,
-  &.ur-editor-is-source-mode .ck-heading-dropdown .ck-dropdown__button::before,
-  &.ur-editor-is-source-mode .ck-heading-dropdown .ck-dropdown__arrow,
-  &.is-source-mode .ck-heading-dropdown .ck-dropdown__button::before,
-  &.is-source-mode .ck-heading-dropdown .ck-dropdown__arrow {
+  .ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button[aria-disabled="true"]::before {
     opacity: var(--ck-disabled-opacity, 0.5) !important;
+  }
+}
+
+/* =============================================
+   ENHANCED SOURCE EDITING MODAL DIALOG
+   ============================================= */
+.ur-source-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  animation: urModalFadeIn 0.15s ease-out;
+}
+
+@keyframes urModalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ur-source-modal {
+  width: 92vw;
+  max-width: 1020px;
+  height: 85vh;
+  max-height: 720px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+  animation: urModalScaleIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes urModalScaleIn {
+  from { transform: scale(0.96); opacity: 0.8; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.ur-source-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.ur-source-modal-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.4;
+}
+
+.ur-source-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 18px;
+  line-height: 1;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+  }
+}
+
+.ur-source-modal-body {
+  flex: 1 1 0px;
+  min-height: 0;
+  display: flex;
+  position: relative;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.ur-source-modal-gutter {
+  width: 52px;
+  flex-shrink: 0;
+  padding: 14px 10px 14px 0;
+  text-align: right;
+  user-select: none;
+  color: #94a3b8;
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 13px;
+  line-height: 20px;
+  overflow: hidden;
+  background: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  box-sizing: border-box;
+
+  .ur-source-modal-line-number {
+    height: 20px;
+    line-height: 20px;
+  }
+}
+
+.ur-source-modal-textarea {
+  flex: 1 1 0px;
+  min-width: 0;
+  padding: 14px 16px;
+  margin: 0;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 13px;
+  line-height: 20px;
+  color: #1e293b;
+  background: #ffffff;
+  overflow: auto;
+  white-space: pre;
+  tab-size: 2;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: #cbd5e1;
+  }
+}
+
+.ur-source-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.ur-source-modal-btn {
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 5px;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &-cancel {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+
+    &:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+      color: #0f172a;
+    }
+  }
+
+  &-save {
+    background: #2baa3a;
+    border: 1px solid #2baa3a;
+    color: #ffffff;
+
+    &:hover {
+      background: #238e30;
+      border-color: #238e30;
+      box-shadow: 0 2px 6px rgba(43, 170, 58, 0.35);
+    }
   }
 }
 </style>
