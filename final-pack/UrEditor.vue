@@ -186,7 +186,7 @@ export default {
     // inlineValue: bind with .sync to receive auto-updated CSS-inlined HTML.
     // Only computed & emitted when this listener is present (zero cost otherwise).
     // Usage: <ckeditor-5 :inline-value.sync="myInlineHtml" />
-    // Debounced 400 ms so every keystroke does NOT trigger a full CSS-inline pass.
+    // Debounced 500 ms so every keystroke does NOT trigger a full CSS-inline pass.
     inlineValue: {
       type: String,
       default: null
@@ -646,14 +646,14 @@ export default {
     // 1. LAZY: only runs if parent is listening via $listeners['update:inlineValue']
     //    â†’ zero overhead when the feature is not used
     // 2. DEBOUNCED: waits `delay` ms after last call before running getInlineHtml()
-    //    â†’ avoids heavy CSS-inlining work on every keystroke (default 400 ms)
+    //    â†’ avoids heavy CSS-inlining work on every keystroke (default 500 ms)
     // 3. ALWAYS EMITS regardless of preserveStyles:
     //    - preserveStyles = true  â†’ emits HTML with CSS rules inlined into style=""
     //    - preserveStyles = false â†’ emits the raw HTML (same as v-model value),
     //      no CSS inlining needed since there are no <style> blocks
     //
     // @param {number} delay  Debounce delay in ms. Pass 0 to fire immediately.
-    scheduleInlineValueUpdate(delay = 400) {
+    scheduleInlineValueUpdate(delay = 500) {
       // Early exit: parent not listening â†’ zero cost
       if (!this.$listeners || !this.$listeners['update:inlineValue']) return;
 
@@ -895,9 +895,15 @@ export default {
       // Source HTML: caller-supplied or current editor output (with <style> block prepended)
       const fullHtml = htmlInput !== null ? String(htmlInput) : this.getEditorData();
 
-      // If no style block to work with, return as-is
-      const cssText = this.extractCssText(this.savedStyleBlock);
-      if (!cssText || !this.preserveStyles) {
+      // Extract CSS from htmlInput (if provided) or from savedStyleBlock (when preserveStyles=true)
+      let cssText = '';
+      if (htmlInput !== null) {
+        cssText = this.extractCssText(htmlInput) || (this.preserveStyles ? this.extractCssText(this.savedStyleBlock) : '');
+      } else if (this.preserveStyles) {
+        cssText = this.extractCssText(this.savedStyleBlock);
+      }
+
+      if (!cssText) {
         return fullHtml;
       }
 
