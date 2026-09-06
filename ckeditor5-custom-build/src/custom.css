@@ -261,28 +261,21 @@ a.ck.ck-powered-by__link {
   right: auto !important;
 }
 
-/* Heading Dropdown: Disabled state (e.g. in Source Edit mode or when disabled) */
-.ck.ck-dropdown.ck-heading-dropdown.ck-disabled,
-.ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button.ck-disabled,
-.ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button[aria-disabled="true"],
-.ck-source-editing-mode .ck-heading-dropdown,
-.ck-source-editing-mode .ck-heading-dropdown .ck-dropdown__button,
-.ur-editor-is-source-mode .ck-heading-dropdown,
-.ur-editor-is-source-mode .ck-heading-dropdown .ck-dropdown__button,
-.is-source-mode .ck-heading-dropdown,
-.is-source-mode .ck-heading-dropdown .ck-dropdown__button {
-  opacity: var(--ck-color-button-disabled-opacity, 0.45) !important;
-  cursor: default !important;
-  pointer-events: none !important;
-}
-
+/* Heading Dropdown: Disabled state (e.g. in Source Edit mode or when disabled)
+   Format tương đồng như button group 'fontFamily' và các button khác ở toolbar:
+   - Cho phép click / focus / hover tooltip bình thường (không dùng pointer-events: none)
+   - Chỉ làm mờ icon 'H' và mũi tên với opacity chuẩn của CKEditor (--ck-disabled-opacity, 0.5)
+*/
 .ck.ck-dropdown.ck-heading-dropdown.ck-disabled .ck-dropdown__button::before,
 .ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button.ck-disabled::before,
 .ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button[aria-disabled="true"]::before,
 .ck-source-editing-mode .ck-heading-dropdown .ck-dropdown__button::before,
+.ck-source-editing-mode .ck-heading-dropdown .ck-dropdown__arrow,
 .ur-editor-is-source-mode .ck-heading-dropdown .ck-dropdown__button::before,
-.is-source-mode .ck-heading-dropdown .ck-dropdown__button::before {
-  opacity: var(--ck-color-button-disabled-opacity, 0.45) !important;
+.ur-editor-is-source-mode .ck-heading-dropdown .ck-dropdown__arrow,
+.is-source-mode .ck-heading-dropdown .ck-dropdown__button::before,
+.is-source-mode .ck-heading-dropdown .ck-dropdown__arrow {
+  opacity: var(--ck-disabled-opacity, 0.5) !important;
 }
 
 /* =======================================================

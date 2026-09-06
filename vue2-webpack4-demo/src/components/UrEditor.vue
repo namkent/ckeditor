@@ -733,22 +733,19 @@ export default {
     overflow: hidden !important;
   }
 
-  /* 8. Heading Dropdown Disabled State (in Source Edit mode or when disabled) */
-  .ck.ck-dropdown.ck-heading-dropdown.ck-disabled,
-  .ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button.ck-disabled,
-  .ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button[aria-disabled="true"],
-  &.ur-editor-is-source-mode .ck-heading-dropdown,
-  &.ur-editor-is-source-mode .ck-heading-dropdown .ck-dropdown__button,
-  &.is-source-mode .ck-heading-dropdown,
-  &.is-source-mode .ck-heading-dropdown .ck-dropdown__button {
-    opacity: 0.45 !important;
-    cursor: default !important;
-    pointer-events: none !important;
-
-    &::before,
-    .ck-dropdown__button::before {
-      opacity: 0.45 !important;
-    }
+  /* 8. Heading Dropdown Disabled State (in Source Edit mode or when disabled)
+     Format tương đồng như button group 'fontFamily' và các button khác ở toolbar:
+     - Cho phép click / focus / hover tooltip bình thường (không dùng pointer-events: none)
+     - Chỉ làm mờ icon 'H' và mũi tên với opacity chuẩn của CKEditor (--ck-disabled-opacity, 0.5)
+  */
+  .ck.ck-dropdown.ck-heading-dropdown.ck-disabled .ck-dropdown__button::before,
+  .ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button.ck-disabled::before,
+  .ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button[aria-disabled="true"]::before,
+  &.ur-editor-is-source-mode .ck-heading-dropdown .ck-dropdown__button::before,
+  &.ur-editor-is-source-mode .ck-heading-dropdown .ck-dropdown__arrow,
+  &.is-source-mode .ck-heading-dropdown .ck-dropdown__button::before,
+  &.is-source-mode .ck-heading-dropdown .ck-dropdown__arrow {
+    opacity: var(--ck-disabled-opacity, 0.5) !important;
   }
 }
 </style>
