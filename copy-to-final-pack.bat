@@ -40,7 +40,7 @@ echo.
 echo [2/2] Dang dong bo UrEditor.vue sang final-pack...
 if not exist "%SRC_VUE%" goto :skip_vue
 
-powershell -NoProfile -Command "$content = [System.IO.File]::ReadAllText('%SRC_VUE%', [System.Text.Encoding]::UTF8); $content = $content -replace '../../../ckeditor5-custom-build/dist/ckeditor.js', './dist/ckeditor.js'; [System.IO.File]::WriteAllText('%DEST_VUE%', $content, (New-Object System.Text.UTF8Encoding $false))"
+powershell -NoProfile -Command "$content = [System.IO.File]::ReadAllText('%SRC_VUE%', [System.Text.Encoding]::UTF8); $content = $content.Replace('../../../ckeditor5-custom-build/dist/ckeditor.js', './dist/ckeditor.js').Replace('../../../ckeditor5-custom-build/dist/ckeditor.css', './dist/ckeditor.css'); [System.IO.File]::WriteAllText('%DEST_VUE%', $content, (New-Object System.Text.UTF8Encoding $false))"
 echo [OK] Da dong bo UrEditor.vue thanh cong!
 goto :done_vue
 

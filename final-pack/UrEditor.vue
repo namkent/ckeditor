@@ -1,6 +1,6 @@
 <template>
   <div 
-    class="ckeditor5-component ur-editor-wrapper" 
+    class="ur-editor-wrapper" 
     :class="[
       `mode-${resolvedEditorType}`,
       `ur-editor-type-${resolvedEditorType}`,
@@ -117,6 +117,7 @@ import {
   Markdown,
   CodeEditor
 } from './dist/ckeditor.js';
+import './dist/ckeditor.css';
 
 export default {
   name: 'UrEditor',
@@ -1030,7 +1031,6 @@ export default {
 </script>
 
 <style lang="scss">
-.ckeditor5-component,
 .ur-editor-wrapper {
   width: 100%;
   position: relative;
@@ -1193,11 +1193,237 @@ export default {
     display: none !important;
   }
 
-  /* 5. Table Formatting Cleanup */
-  .ck-content .table table td,
-  .ck-content .table table th {
-    overflow: visible !important;
-    scrollbar-width: none !important;
+  /* ==========================================================================
+     CSS ISOLATION SHIELD FOR UrEditor CONTENT & STRUCTURE
+     Protects editor content (.ck-content) from aggressive external CSS resets
+     (e.g., enterprise global table, cell padding/border, list-style, button resets)
+     while respecting CKEditor inline styles and table properties.
+     ========================================================================== */
+  .ck-content,
+  &.is-view-mode .ck-content,
+  .ur-editor-view-container.ck-content {
+    /* 1. Core Content Typography */
+    font-family: var(--ck-content-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
+    font-size: var(--ck-content-font-size, 15px);
+    line-height: var(--ck-content-line-height, 1.68);
+    color: var(--ck-content-font-color, #1e293b);
+    text-align: left;
+    word-wrap: break-word;
+    box-sizing: border-box;
+
+    /* 2. Paragraphs & Headings Isolation */
+    p {
+      margin-top: 0;
+      margin-bottom: 1.15em;
+      line-height: 1.68;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      color: #0f172a;
+      font-weight: 700;
+      line-height: 1.35;
+      margin-top: 1.4em;
+      margin-bottom: 0.55em;
+    }
+    h1 { font-size: 2em; }
+    h2 { font-size: 1.55em; }
+    h3 { font-size: 1.25em; }
+    h4 { font-size: 1.1em; }
+
+    /* 3. TABLE ISOLATION (Both CKEditor figure.table and raw <table>) */
+    table {
+      border-collapse: collapse !important;
+      border-spacing: 0 !important;
+      box-sizing: border-box !important;
+      max-width: 100%;
+      empty-cells: show;
+      background-color: transparent;
+    }
+
+    /* CKEditor Table Widget Container */
+    figure.table {
+      margin: 0.9em auto;
+
+      /* KEY FIX: Table inside figure MUST have margin: 0 to prevent widget selection outline misalignment */
+      > table {
+        margin: 0 !important;
+      }
+    }
+
+    /* Standalone raw table (pasted or not wrapped in figure) */
+    > table,
+    table:not(figure table) {
+      margin: 0.9em auto;
+    }
+
+    /* Fallback border for table when no inline border is specified */
+    table:not([style*="border"]):not(.layout-table),
+    figure.table:not(.layout-table) > table:not([style*="border"]) {
+      border: 1px solid #bfbfbf;
+    }
+
+    /* Cell layout & properties isolation */
+    table th,
+    table td,
+    figure.table > table > tbody > tr > th,
+    figure.table > table > tbody > tr > td,
+    figure.table > table > thead > tr > th,
+    figure.table > table > thead > tr > td {
+      min-width: 2em;
+      box-sizing: border-box !important;
+      vertical-align: middle;
+      word-break: normal;
+      overflow-wrap: break-word;
+      background-clip: padding-box;
+      overflow: visible !important;
+      scrollbar-width: none !important;
+    }
+
+    /* Guarded cell padding: blocks external global padding resets, preserves inline custom padding */
+    table th:not([style*="padding"]),
+    table td:not([style*="padding"]),
+    figure.table > table th:not([style*="padding"]),
+    figure.table > table td:not([style*="padding"]) {
+      padding: 0.4em 0.6em !important;
+    }
+
+    /* Guarded cell border: blocks external global border resets, preserves inline custom borders */
+    table th:not([style*="border"]),
+    table td:not([style*="border"]),
+    figure.table > table th:not([style*="border"]),
+    figure.table > table td:not([style*="border"]) {
+      border: 1px solid #bfbfbf !important;
+    }
+
+    /* Header cell styling */
+    table th:not([style*="background"]),
+    figure.table > table th:not([style*="background"]) {
+      background: rgba(0, 0, 0, 0.05) !important;
+      font-weight: 700;
+    }
+
+    /* Cell text alignment: defaults to start/left unless specified by style or attribute */
+    table th:not([align]):not([style*="text-align"]) {
+      text-align: left;
+    }
+    table td:not([align]):not([style*="text-align"]) {
+      text-align: left;
+    }
+
+    /* Paragraphs inside table cells */
+    table th > p,
+    table td > p,
+    figure.table > table th > p,
+    figure.table > table td > p {
+      margin-top: 0 !important;
+      margin-bottom: 0.25em !important;
+      line-height: inherit !important;
+
+      &:last-child {
+        margin-bottom: 0 !important;
+      }
+    }
+
+    /* 4. LIST ISOLATION (Restore bullet discs & numbering from global list-style: none) */
+    ul:not(.todo-list) {
+      list-style-type: disc !important;
+      padding-left: 2.2em !important;
+      margin-top: 0.5em !important;
+      margin-bottom: 1.15em !important;
+
+      ul {
+        list-style-type: circle !important;
+        margin-bottom: 0.25em !important;
+
+        ul {
+          list-style-type: square !important;
+        }
+      }
+    }
+
+    ol {
+      list-style-type: decimal !important;
+      padding-left: 2.2em !important;
+      margin-top: 0.5em !important;
+      margin-bottom: 1.15em !important;
+
+      ol {
+        list-style-type: lower-latin !important;
+        margin-bottom: 0.25em !important;
+
+        ol {
+          list-style-type: lower-roman !important;
+        }
+      }
+    }
+
+    li {
+      display: list-item !important;
+      margin-bottom: 0.35em !important;
+      line-height: 1.65 !important;
+      padding-left: 0 !important;
+
+      > p {
+        margin-top: 0 !important;
+        margin-bottom: 0.35em !important;
+      }
+    }
+
+    /* 5. Blockquote Isolation */
+    blockquote {
+      border-left: 4px solid #cbd5e1 !important;
+      padding: 8px 18px !important;
+      margin: 1.3em 0 !important;
+      color: #475569 !important;
+      font-style: italic !important;
+      background: #f8fafc !important;
+      border-radius: 0 4px 4px 0 !important;
+
+      p {
+        margin-bottom: 0.5em !important;
+        &:last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+    }
+
+    /* 6. Code & Pre Isolation */
+    pre {
+      padding: 1em !important;
+      color: #333 !important;
+      background: #f5f5f5 !important;
+      border-radius: 4px !important;
+      border: 1px solid #e0e0e0 !important;
+      overflow-x: auto !important;
+      margin: 1em 0 !important;
+
+      code {
+        background-color: transparent !important;
+        padding: 0 !important;
+      }
+    }
+
+    code:not(pre code) {
+      background-color: rgba(0, 0, 0, 0.06) !important;
+      padding: 0.15em 0.3em !important;
+      border-radius: 3px !important;
+      font-family: monospace !important;
+    }
+
+    /* 7. Horizontal Rule */
+    hr {
+      border: 0 !important;
+      border-top: 1px solid #e2e8f0 !important;
+      margin: 1.5em 0 !important;
+    }
+  }
+
+  /* 8. Toolbar & Editor Chrome Button Protection */
+  .ck.ck-toolbar {
+    button.ck-button {
+      box-sizing: border-box !important;
+      font-weight: normal;
+    }
   }
 
   /* 6. Hide CKEditor 5 Powered-By Logo & Watermarks */
@@ -1424,6 +1650,39 @@ export default {
       background: #238e30;
       border-color: #238e30;
       box-shadow: 0 2px 6px rgba(43, 170, 58, 0.35);
+    }
+  }
+}
+
+/* ==========================================================================
+   FLOATING PANELS & DROPDOWNS ISOLATION (.ck.ck-body-wrapper)
+   CKEditor balloons, link popups, table toolbars, and color pickers
+   are appended directly to <body>. Protect them from global body resets.
+   ========================================================================== */
+body > .ck.ck-body-wrapper,
+.ck.ck-body-wrapper {
+  .ck-dropdown__panel,
+  .ck-balloon-panel,
+  .ck-dialog {
+    box-sizing: border-box;
+
+    button.ck-button {
+      box-sizing: border-box !important;
+      font-weight: normal;
+    }
+
+    /* Guard table color grid and dialog tables from global table resets */
+    table {
+      border-collapse: collapse !important;
+      border-spacing: 0 !important;
+      margin: 0 !important;
+      width: auto !important;
+      border: none !important;
+
+      td, th {
+        padding: 0;
+        border: none !important;
+      }
     }
   }
 }

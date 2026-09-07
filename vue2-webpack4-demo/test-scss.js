@@ -1,6 +1,5 @@
 const sass = require('sass');
 const result = sass.compileString(`
-.ckeditor5-component,
 .ur-editor-wrapper {
   width: 100%;
   

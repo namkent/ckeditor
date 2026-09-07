@@ -300,6 +300,13 @@
               >
                 ℹ️ Props &amp; Hướng dẫn Config
               </button>
+              <button 
+                class="tab-btn" 
+                :class="{ active: activeTab === 'isolation' }" 
+                @click="activeTab = 'isolation'"
+              >
+                🛡️ Kiểm Tra Cô Lập CSS
+              </button>
             </div>
           </div>
 
@@ -428,6 +435,56 @@ const customConfig = {
 &lt;ckeditor-5 editor="inline" :config="customConfig" /&gt;</code></pre>
               </div>
             </div>
+
+            <!-- Tab 4: Isolation Stress-Test (External Legacy Resets vs Isolated UrEditor) -->
+            <div v-show="activeTab === 'isolation'" class="isolation-test-container">
+              <div class="isolation-alert">
+                <strong>🛡️ Môi trường giả lập Enterprise Vue 2 (Node 12 + Webpack 4)</strong>
+                <p>Cấu hình <code>sass-loader</code> đang tự động nạp <code>customToken.scss</code> và <code>starterTokenEntry.scss</code> chứa các luật reset gắt (bảng viền đỏ nét đứt, padding 20px, canh giữa, danh sách mất bullet, nút xanh bo tròn).</p>
+              </div>
+
+              <div class="isolation-grid">
+                <div class="isolation-card corporate-reset">
+                  <div class="isolation-card-header text-danger">
+                    ⚠️ HTML bên ngoài (Bị ảnh hưởng bởi CSS Reset dự án cũ):
+                  </div>
+                  <div class="isolation-card-body">
+                    <p>Đoạn văn bên ngoài chịu margin từ reset chung.</p>
+                    <button class="legacy-btn">Nút bấm thông thường</button>
+                    <ul class="legacy-list" style="margin-top: 10px;">
+                      <li>Mục danh sách A (Mất dấu chấm do list-style: none)</li>
+                      <li>Mục danh sách B (Mất dấu chấm do list-style: none)</li>
+                    </ul>
+                    <table class="legacy-table">
+                      <thead>
+                        <tr>
+                          <th>Tiêu đề A</th>
+                          <th>Tiêu đề B</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Dữ liệu 1 (bị đè viền đỏ &amp; padding 20px)</td>
+                          <td>Dữ liệu 2 (bị canh giữa)</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div class="isolation-card">
+                  <div class="isolation-card-header text-success">
+                    ✅ Hiển thị bên trong UrEditor (Được cô lập hoàn toàn):
+                  </div>
+                  <div class="isolation-card-body">
+                    <ur-editor 
+                      mode="view" 
+                      :value="isolationSampleHtml"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -442,7 +499,6 @@ const customConfig = {
 
 <script>
 import UrEditor from './components/UrEditor.vue';
-import '../../ckeditor5-custom-build/dist/ckeditor.css';
 
 export default {
   name: 'App',
@@ -465,6 +521,37 @@ export default {
       toastMessage: '',
       toastTimer: null,
       inlineHtmlOutput: '',
+      isolationSampleHtml: `
+        <p>Văn bản chuẩn bên trong UrEditor với font chữ, margin và khoảng cách tự nhiên.</p>
+        <ul>
+          <li>Mục danh sách cấp 1 (Dấu chấm tròn chuẩn, không bị mất do list-style: none)</li>
+          <li>Mục danh sách cấp 1 thứ hai
+            <ul>
+              <li>Mục con lồng cấp 2 (Dấu tròn rỗng chuẩn)</li>
+            </ul>
+          </li>
+        </ul>
+        <figure class="table">
+          <table>
+            <thead>
+              <tr>
+                <th>Tiêu đề cột A</th>
+                <th>Tiêu đề cột B</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Ô dữ liệu 1 (Không bị dính viền đỏ 3px nét đứt)</td>
+                <td>Padding 0.4em 0.6em chuẩn CKEditor (Không bị giãn 20px)</td>
+              </tr>
+              <tr>
+                <td>Căn lề trái tự nhiên (Không bị ép canh giữa)</td>
+                <td>Viền xám mảnh 1px đồng nhất</td>
+              </tr>
+            </tbody>
+          </table>
+        </figure>
+      `,
       content: `
         <h2>Bảng dữ liệu cấu hình thử nghiệm 📊</h2>
         <p>Bảng bên dưới đã được khắc phục hoàn toàn lỗi thanh cuộn (scroll) ở từng ô:</p>
@@ -677,7 +764,7 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 /* Reset & Base */
 .app-container {
   display: flex;
@@ -1208,5 +1295,67 @@ export default {
   font-size: 14px;
   font-weight: 500;
   z-index: 9999;
+}
+
+/* Isolation Stress-Test Styles */
+.isolation-test-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.isolation-alert {
+  background: #0f172a;
+  border: 1px solid #3b82f6;
+  border-left: 4px solid #3b82f6;
+  border-radius: 6px;
+  padding: 12px 16px;
+  color: #94a3b8;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.isolation-alert strong {
+  color: #60a5fa;
+  display: block;
+  margin-bottom: 4px;
+}
+.isolation-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 900px) {
+  .isolation-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.isolation-card {
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.isolation-card-header {
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 13px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+.isolation-card-header.text-danger {
+  background: #fff1f2;
+  color: #be123c;
+  border-bottom-color: #fecdd3;
+}
+.isolation-card-header.text-success {
+  background: #f0fdf4;
+  color: #15803d;
+  border-bottom-color: #bbf7d0;
+}
+.isolation-card-body {
+  padding: 16px;
+  flex: 1;
+  color: #1e293b;
 }
 </style>

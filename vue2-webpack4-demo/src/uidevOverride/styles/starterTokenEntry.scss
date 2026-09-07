@@ -1,0 +1,51 @@
+// starterTokenEntry.scss
+// Simulating aggressive legacy enterprise CSS resets (e.g. uidev / lego environment)
+// These styles are automatically injected into all Vue SCSS blocks via sass-loader.
+
+/* External Corporate Table Resets (Red dashed border, thick padding, center align) */
+.legacy-app-wrapper table.legacy-table,
+.corporate-reset table {
+  border-collapse: separate;
+  border-spacing: 2px;
+  width: 100%;
+  border: 3px dashed #ef4444 !important;
+  margin: 16px 0;
+  background-color: #fef2f2;
+}
+
+.legacy-app-wrapper table.legacy-table th,
+.legacy-app-wrapper table.legacy-table td,
+.corporate-reset table th,
+.corporate-reset table td {
+  padding: 16px 20px !important;
+  border: 2px dashed #dc2626 !important;
+  text-align: center !important;
+  color: #b91c1c !important;
+  font-size: 13px !important;
+  background-color: #fee2e2 !important;
+}
+
+/* External List Resets (Strips bullet discs and numbering) */
+.legacy-app-wrapper ul.legacy-list,
+.corporate-reset ul,
+.corporate-reset ol {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+
+  li {
+    color: #ef4444 !important;
+  }
+}
+
+/* External Button Resets */
+.legacy-app-wrapper button.legacy-btn,
+.corporate-reset button:not(.ck-button) {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border-radius: 20px !important;
+  padding: 8px 18px !important;
+  font-weight: 600 !important;
+  border: none !important;
+  cursor: pointer;
+}

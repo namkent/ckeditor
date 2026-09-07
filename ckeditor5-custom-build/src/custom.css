@@ -381,8 +381,7 @@ a.ck.ck-powered-by__link {
 /* =============================================
    Fullscreen Mode Z-Index Elevation
    ============================================= */
-.ur-editor-wrapper.ur-editor-is-fullscreen,
-.ckeditor5-component.ur-editor-is-fullscreen {
+.ur-editor-wrapper.ur-editor-is-fullscreen {
   z-index: 100005 !important;
 }
 
